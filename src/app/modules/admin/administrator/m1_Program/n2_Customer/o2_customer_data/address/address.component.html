@@ -82,7 +82,7 @@
       </div>
 
       <!-- Address Section -->
-      <div *ngIf="Id" class="address-section">
+      <div class="address-section">
         <div class="section-header">
           <h3 class="section-title">ที่อยู่ลูกค้า</h3>
           <button mat-flat-button color="primary" (click)="openAddressDialog()" class="add-button">
@@ -106,22 +106,22 @@
             </tr>
             </thead>
             <tbody>
-            <tr *ngIf="(item?.customer__addresses?.length || 0) === 0">
+            <tr *ngIf="addressRows.length === 0">
               <td colspan="8" class="no-data">ไม่มีข้อมูล</td>
             </tr>
-            <tr *ngFor="let it of item?.customer__addresses; let j = index" class="address-row">
+            <tr *ngFor="let it of addressRows; let j = index" class="address-row">
               <td>{{ j + 1 }}</td>
               <td>{{ it?.address }}</td>
               <td>{{ it?.provinces?.name_th }}</td>
               <td>{{ it?.districts?.name_th }}</td>
               <td>{{ it?.sub_districts?.name_th }}</td>
               <td>{{ it?.zip_code }}</td>
-              <td>{{ it?.is_main === 1 ? 'หลัก' : 'รอง' }}</td>
+              <td>{{ (it?.is_main === 1 || it?.is_main === true) ? 'หลัก' : 'รอง' }}</td>
               <td class="action-buttons">
-                <button mat-icon-button (click)="openAddressDialog(it.id)">
+                <button mat-icon-button (click)="openAddressDialog(Id ? it.id : j)">
                   <mat-icon>edit</mat-icon>
                 </button>
-                <button mat-icon-button (click)="deleteAddress(it.id)">
+                <button mat-icon-button (click)="deleteAddress(Id ? it.id : j)">
                   <mat-icon>delete</mat-icon>
                 </button>
               </td>
@@ -148,20 +148,20 @@
 <ng-template #AddressDialog>
   <div class="dialog-container">
     <form [formGroup]="formData_address">
-      <h2 mat-dialog-title class="dialog-title">ที่อยู่ลูกค้า</h2>
+      <app-dialog-header title='ที่อยู่ลูกค้า' (closeClick)="closeDialog(addressDialogRef)"></app-dialog-header>
 
       <mat-dialog-content class="dialog-content">
         <div class="dialog-field">
-          <mat-form-field appearance="outline" class="w-full">
-            <mat-label>ที่อยู่</mat-label>
+          <mat-form-field appearance="outline" class="w-full" hideRequiredMarker>
+            <mat-label>ที่อยู่<span class="bill-required-star">*</span></mat-label>
             <input matInput placeholder="ที่อยู่" formControlName="address">
           </mat-form-field>
         </div>
 
         <!-- Province -->
         <div class="dialog-field">
-          <mat-form-field appearance="outline" class="w-full">
-            <mat-label>จังหวัด</mat-label>
+          <mat-form-field appearance="outline" class="w-full" hideRequiredMarker>
+            <mat-label>จังหวัด<span class="bill-required-star">*</span></mat-label>
             <mat-select formControlName="province">
               <mat-option *ngFor="let p of filteredProvinces" [value]="p.name_th">
                 {{ p.name_th }}
@@ -172,8 +172,8 @@
 
         <!-- District -->
         <div class="dialog-field">
-          <mat-form-field appearance="outline" class="w-full">
-            <mat-label>อำเภอ</mat-label>
+          <mat-form-field appearance="outline" class="w-full" hideRequiredMarker>
+            <mat-label>อำเภอ<span class="bill-required-star">*</span></mat-label>
             <mat-select formControlName="districts">
               <mat-option *ngFor="let d of filteredDistricts" [value]="d.name_th">
                 {{ d.name_th }}
@@ -184,8 +184,8 @@
 
         <!-- Subdistrict -->
         <div class="dialog-field">
-          <mat-form-field appearance="outline" class="w-full">
-            <mat-label>ตำบล</mat-label>
+          <mat-form-field appearance="outline" class="w-full" hideRequiredMarker>
+            <mat-label>ตำบล<span class="bill-required-star">*</span></mat-label>
             <mat-select formControlName="subdistricts">
               <mat-option *ngFor="let s of filteredSubDistricts" [value]="s.name_th">
                 {{ s.name_th }}

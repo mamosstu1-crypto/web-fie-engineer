@@ -59,8 +59,7 @@
 <ng-template #Dialog>
     <div class="flex flex-col">
         <form [formGroup]="formData">
-            <h2 mat-dialog-title *ngIf="!isEdit">เพิ่มตำแหน่ง</h2>
-            <h2 mat-dialog-title *ngIf="isEdit">แก้ไขตำแหน่ง</h2>
+            <app-dialog-header [title]="isEdit ? 'แก้ไขตำแหน่ง' : 'เพิ่มตำแหน่ง'" (closeClick)="closeDialog()"></app-dialog-header>
             <mat-dialog-content>
                 <!-- REPLACE CONTENT mt-2-->
                 <div class="flex flex-col w-full lg:w-4/4 mt-2">

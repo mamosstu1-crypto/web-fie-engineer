@@ -330,7 +330,6 @@ export class FormInvoiceComponent implements OnInit, AfterViewInit, OnDestroy {
                         due_date: due_date,
                     })
                     let formValue = this.form.value
-                        console.log(this.form.value,'Value')
                     this._Service.createInvoice(formValue).subscribe({
                         next: (resp: any) => {
                             this._router.navigate(['document/list/invoice']);

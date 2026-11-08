@@ -1,0 +1,30 @@
+.app-dialog-header {
+    align-items: center;
+    border-bottom: 1px solid #e5e7eb;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    margin: 0 0 0.5rem;
+    padding: 0 0 0.75rem;
+    width: 100%;
+}
+
+.app-dialog-header__title {
+    color: #111827;
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.75rem;
+    padding-right: 0.5rem;
+}
+
+.app-dialog-header__close {
+    flex-shrink: 0;
+    margin-right: -0.5rem;
+}
+
+.app-dialog-header__close-icon {
+    color: #4b5563;
+    font-size: 1.5rem;
+    height: 1.5rem;
+    width: 1.5rem;
+}

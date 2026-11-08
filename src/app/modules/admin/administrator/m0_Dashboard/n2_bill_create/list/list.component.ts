@@ -69,7 +69,6 @@ import { add } from 'lodash';
 import { EmsDialogComponent } from '../ems-dialog/ems-dialog.component';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { CustomerDialogComponent } from '../customer-dialog/customer-dialog.component';
-import { MatAutocompleteTrigger } from '@angular/material/autocomplete';
 
 @Component({
     selector: 'list',
@@ -125,11 +124,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // carcheck
     public formData_CarCheck: FormGroup;
-
-    customerCtrl = new FormControl();
-    customers: any[] = [];
-    title: any;
-
 
     /** Dialog declare */
     @ViewChildren(DataTableDirective) dtElements: QueryList<DataTableDirective>;
@@ -245,7 +239,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         { label: 'บริษัท', value: 'vendor' },
         { label: 'ตัวแทน', value: 'agent' },
     ];
-    @ViewChild(MatAutocompleteTrigger) autoTrigger!: MatAutocompleteTrigger;
 
     // #endregion COLLAPSEPOINT
 
@@ -472,35 +465,38 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
                         this._filterListN(this.listcustomerNo, value, 'no')
                     )
                 );
-            this._Service.getVehicle().subscribe((resp) => {
-                this.listVehicles = resp;
-                this.filteredVehicles = this.formData
-                    .get('licenseNumber')
-                    .valueChanges.pipe(
-                        startWith(''),
-                        map((value) => this._filterVehicles(value))
+            this._setupVehicleNumberAutocomplete();
+            this._Service.getVehicle().subscribe({
+                next: (resp) => {
+                    this.listVehicles = this._normalizeVehicleList(resp);
+                    this._changeDetectorRef.markForCheck();
+                },
+                error: (err) => {
+                    console.error('โหลดรายการทะเบียนไม่สำเร็จ', err);
+                    this.listVehicles = [];
+                    this._US.showFlashMessage(
+                        'error',
+                        this._changeDetectorRef,
+                        this
                     );
+                },
             });
 
+            this.formData.get('licenseLetters')?.enable({ emitEvent: false });
             this.formData
                 .get('licenseNumber')
                 ?.valueChanges.subscribe((value) => {
-                    this.isNumberValid =
-                        value.length > 0 && !isNaN(Number(value));
-
-                    if (this.isNumberValid) {
-                        this.formData.get('licenseLetters')?.enable();
-                    } else {
-                        this.formData.get('licenseLetters')?.disable();
-                        this.formData.get('licenseLetters')?.setValue('');
-                    }
+                    const v = (value ?? '').toString().trim();
+                    this.isNumberValid = v.length > 0 && !isNaN(Number(v));
                     this.combineLicensePlate();
                 });
             this.formData.get('licenseLetters')?.valueChanges.subscribe(() => {
                 this.combineLicensePlate();
             });
 
-            this.loadservice();
+            if (!id) {
+                this.loadservice();
+            }
 
             this.formData
                 .get('is_headquarter')
@@ -1083,8 +1079,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.formData.patchValue({
                     employee_id: userObject.employees_id ?? 1,
                 });
-            } else {
-                console.log('No user data found in localStorage');
             }
         }
 
@@ -1244,7 +1238,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
                             .at(4)
                             .get('service_price')
                             .setValue(resp.data.price);
-                        console.log(this.servicesFormArray.value);
                     },
                     error: (error) => {
                         console.error('Error calculating taxservice:', error);
@@ -1276,64 +1269,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
             this.loadBillData(id);
         }
 
-        this.customerCtrl.valueChanges.pipe(
-            debounceTime(300),
-            distinctUntilChanged(),
-
-            // ✅ กรณีพิมพ์เอง (string) ให้ sync ไป formData.name ทันที
-            tap((text: any) => {
-                if (typeof text === 'string') {
-                    const q = (text ?? '').trim();
-
-                    this.formData.patchValue(
-                        {
-                            customer_id: null,   // ✅ ไม่ได้เลือกจาก list
-                            name: q,             // ✅ ส่งชื่อได้แน่นอน
-                            // lname: this.formData.get('lname')?.value ?? '' // จะคงไว้ก็ได้
-                        },
-                        { emitEvent: false }
-                    );
-
-                    this.customerID = null; // กันค้างค่าเดิมจากการเลือก option
-                }
-            }),
-
-            switchMap((text: any) => {
-                // ✅ ถ้าเลือกแล้วเป็น object ไม่ต้อง search
-                if (typeof text !== 'string') {
-                    this.customers = [];
-                    this.safeClosePanel();
-                    return of(null);
-                }
-
-                const q = (text ?? '').trim();
-
-                // ✅ ถ้าไม่พิมพ์อะไร ให้เคลียร์ list
-                if (!q) {
-                    this.customers = [];
-                    this.safeClosePanel();
-                    return of(null);
-                }
-
-                this.isLoading = true;
-
-                return this._Service.getCustomersAutoComplete(q, 10).pipe(
-                    catchError(() => of({ data: [] })),
-                    finalize(() => (this.isLoading = false)) // ✅ ไม่ค้างแน่นอน
-                );
-            }),
-
-            tap((res: any) => {
-                if (!res) return;
-
-                this.customers = res?.data ?? [];
-
-                // ✅ ทำให้พิมพ์แล้ว dropdown เปิดทันที
-                // ถ้าอยากให้ขึ้น "ไม่พบข้อมูล" ก็เปิด panel แม้ length=0
-                this.safeOpenPanel();
-            })
-        ).subscribe();
-
     }
     ngAfterViewInit(): void { }
     ngOnDestroy(): void {
@@ -1359,6 +1294,10 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
             const serviceFormArray = this.formData.get(
                 'List_service_tran'
             ) as FormArray;
+            // กัน race กับ loadBillData: callback ช้ากว่า clear+โหลดบิลจะไม่ push ซ้ำ
+            if (serviceFormArray.length > 0) {
+                return;
+            }
             services.forEach((service, index) => {
                 const serviceGroup = this.createServiceGroup(service);
                 serviceGroup
@@ -1425,12 +1364,18 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
      * @function ฟังก์ชันสำหรับเชื่อมตัวอักษรกับเลขทะเบียนสำหรับการ patch
      */
     combineLicensePlate(): void {
-        if (this.isNumberValid) {
-            const licensePlate = `${this.formData.get('licenseLetters')?.value}
-                -${this.formData.get('licenseNumber')?.value}`;
-            this.formData.patchValue({ license_plate: licensePlate });
-            this._changeDetectorRef.detectChanges();
+        const letters = (this.formData.get('licenseLetters')?.value ?? '')
+            .toString()
+            .trim();
+        const number = (this.formData.get('licenseNumber')?.value ?? '')
+            .toString()
+            .trim();
+        if (!letters || !number) {
+            return;
         }
+        const licensePlate = `${letters}-${number}`;
+        this.formData.patchValue({ license_plate: licensePlate }, { emitEvent: false });
+        this._changeDetectorRef.detectChanges();
     }
 
     /**
@@ -1442,25 +1387,67 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
             (insurance) =>
                 insurance.vehicle_inspection_types_id === inspectionId
         );
-        console.log('filteredInsuranceTypes', this.filteredInsuranceTypes);
     }
     /**
      *
      * @param value ค่าตัวเลขสำหรับ filter เลขทะเบียน (เช่น value = 12 จะค้นหาทะเบียนที่มี 12 เป็นส่วนประกอบ)
      * @returns ผลลัพธ์ที่ผ่านการ filter แล้วเป็น array
      */
-    private _filterVehicles(value: string): any[] {
-        if (!value) {
+    private _normalizeVehicleList(resp: any): any[] {
+        const rows = Array.isArray(resp)
+            ? resp
+            : Array.isArray(resp?.data)
+              ? resp.data
+              : [];
+        return rows
+            .filter((v) => (v?.license_plate ?? '').toString().trim())
+            .sort((a, b) =>
+                (a.license_plate ?? '').localeCompare(b.license_plate ?? '', 'th')
+            );
+    }
+
+    /** autocomplete ทะเบียน — พิมพ์ที่ช่องเลข แล้วเลือกจากรายการ (แบบเดิม) */
+    private _setupVehicleNumberAutocomplete(): void {
+        const numberCtrl = this.formData.get('licenseNumber');
+        if (!numberCtrl) {
+            return;
+        }
+        this.filteredVehicles = numberCtrl.valueChanges.pipe(
+            startWith(numberCtrl.value ?? ''),
+            map((value) => this._filterVehiclesByNumber(value))
+        );
+    }
+
+    vehicleLicenseNumberPart(vehicle: { license_plate?: string }): string {
+        return this._splitLicensePlate(vehicle?.license_plate ?? '').number;
+    }
+
+    private _filterVehiclesByNumber(value: string): any[] {
+        const filterValue = (value ?? '').toString().trim().toLowerCase();
+        if (!filterValue) {
             return [];
         }
-
-        const filterValue = value.toLowerCase();
         return this.listVehicles.filter((vehicle) => {
-            const [letters, number] = vehicle.license_plate.split('-');
-            const licensePlate = `${letters}-${number}`;
-            return number && number.startsWith(filterValue);
+            const parts = this._splitLicensePlate(vehicle.license_plate ?? '');
+            return (
+                parts.number &&
+                parts.number.toLowerCase().startsWith(filterValue)
+            );
         });
     }
+
+    private _splitLicensePlate(plate: string): { letters: string; number: string } {
+        const raw = (plate ?? '').toString().trim();
+        const dash = raw.indexOf('-');
+        if (dash < 0) {
+            return { letters: '', number: raw };
+        }
+        return {
+            letters: raw.slice(0, dash).trim(),
+            number: raw.slice(dash + 1).trim(),
+        };
+    }
+
     /**
      *
      * @param list array ที่รับชุดข้อมูลจาก API (ข้างในเป็น object)
@@ -1472,8 +1459,12 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         if (!list || !Array.isArray(list.data)) {
             return [];
         }
+        const term = (value ?? '').toString().toLowerCase().trim();
+        if (!term) {
+            return [];
+        }
         return list.data.filter((item) =>
-            item[key].toLowerCase().includes(value)
+            (item[key] ?? '').toString().toLowerCase().includes(term)
         );
     }
     /**
@@ -1549,6 +1540,8 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
                     discount_after_vat,
                     total_vatcal,
                     total_nonvatcal,
+                    remark,
+                    remark_transport,
                 } = billData;
                 const {
                     registration_date: regeister_date,
@@ -1569,28 +1562,14 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
                     is_headquarter,
                 } = billData.customers || {};
 
-                const customerObj = billData.customers
-                    ? {
-                        id: billData.customers.id,
-                        no: billData.customers.no,
-                        name: billData.customers.name,
-                        lname: billData.customers.lname,
-                        phone_number1: billData.customers.phone_number1,
-                        phone_number2: billData.customers.phone_number2,
-                        tax_id: billData.customers.tax_id,
-                        type: billData.customers.type,
-                        is_headquarter: billData.customers.is_headquarter,
-                        customer__addresses: billData.customers.customer__addresses ?? []
-                    }
-                    : null;
-
-                // ✅ ทำให้ช่อง autocomplete แสดงชื่อ (ไม่ยิง search)
-                if (customerObj) {
-                    this.customerCtrl.setValue(customerObj, { emitEvent: false }); // สำคัญมาก: emitEvent false กันไปยิง API
-                } else {
-                    this.customerCtrl.setValue('', { emitEvent: false });
+                let customerName = name;
+                let customerType = type;
+                if (billData.customers) {
+                    customerType = type || billData.customers.type || 'personal';
+                    this.onCustomerTypeChange(customerType);
+                    customerName = name ?? billData.customers.name ?? '';
+                    this.customerID = billData.customers.id;
                 }
-
 
                 this.formData.patchValue({
                     id,
@@ -1610,6 +1589,8 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
                     discount_after_vat,
                     total_vatcal,
                     total_nonvatcal,
+                    remark: remark ?? '',
+                    remark_transport: remark_transport ?? '',
                     regeister_date,
                     cc,
                     weight,
@@ -1625,16 +1606,17 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
                     customer_id: +billData.customer_id,
                     ...(billData.customers
                         ? {
-                            name,
+                            name: customerName,
                             lname,
                             phone_number1,
                             phone_number2,
                             tax_id,
-                            type,
+                            type: customerType,
                             is_headquarter,
                         }
                         : {}),
                 });
+                this.formData.get('licenseLetters')?.enable({ emitEvent: false });
             });
 
 
@@ -1647,6 +1629,7 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
             this._Service.getServices().subscribe((resp) => {
                 const services = resp;
                 const serviceFormArray = this.formData.get('List_service_tran') as FormArray;
+                serviceFormArray.clear();
 
                 services.forEach((service, index) => {
                     const serviceGroup = this.createServiceGroup(service);
@@ -1708,6 +1691,11 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
                 // ต้องเรียกฟังก์ชันหลัง patch
                 this.updateServiceStatusFlags();
                 this.isAutoPatch = false;
+                this.syncRemarkFieldVisibility(billData);
+                this.formData.patchValue({
+                    remark: billData.remark ?? '',
+                    remark_transport: billData.remark_transport ?? '',
+                });
                 this.sumTotal();
                 this._changeDetectorRef.detectChanges();
             });
@@ -1756,14 +1744,7 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
                     }
                 );
             }
-
-
-
-
         });
-
-        // console.log(this.formData.value, 'formData');
-
     }
 
     updateServiceStatusFlags(): void {
@@ -1830,6 +1811,9 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
             return; // 🛑 ไม่ทำอะไรถ้าเป็นการ patch จากระบบ
         }
         const status = service.get('status').value;
+        if (status && this.isAtLeastOneService()) {
+            this.serviceRequireError = false;
+        }
 
         // switch (index) {
         //     // add service slot
@@ -1964,40 +1948,59 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
      *  **รวมไปถึงการ patch ข้อมูลพื้นฐานของพาหนะและรับ API ข้อมูลเชื้อเพลิง
      *  **ทำงานเมื่อ trigger '(optionSelected)' ผ่าน HTML
      */
-    onVehicleSelected(vehicleNumber: string): void {
-        const fornt = vehicleNumber.split('-')[0];
-        const back = vehicleNumber.split('-')[1];
-        const selectedVehicle = this.listVehicles.find((v) => {
-            const [letters, number] = v.license_plate.split('-');
-            return letters === fornt && number === back;
-        });
+    onVehicleSelected(event: { option?: { viewValue?: unknown; value?: unknown } } | string): void {
+        let selectedVehicle: (typeof this.listVehicles)[number] | undefined;
+        if (event && typeof event === 'object' && event.option?.viewValue != null) {
+            const plate = event.option.viewValue.toString().trim();
+            selectedVehicle = this.listVehicles.find(
+                (v) => (v.license_plate ?? '').toString().trim() === plate
+            );
+        }
+        const key = (
+            typeof event === 'string' ? event : event?.option?.value ?? ''
+        )
+            .toString()
+            .trim();
+        if (!selectedVehicle) {
+            const picked = this._splitLicensePlate(key);
+            const fornt = picked.letters;
+            const back = picked.number;
+            selectedVehicle = this.listVehicles.find((v) => {
+                const parts = this._splitLicensePlate(v.license_plate ?? '');
+                if (key.includes('-')) {
+                    return parts.letters === fornt && parts.number === back;
+                }
+                return parts.number === key;
+            });
+        }
+
+        if (!selectedVehicle) {
+            return;
+        }
 
         const selectedProvince = this.listProvinces.find(
             (p) => p.id === selectedVehicle.province_id
         );
         const provinceName = selectedProvince ? selectedProvince.name_th : null;
 
-        if (selectedVehicle) {
-            const [letters, number] = selectedVehicle.license_plate.split('-');
+        const parts = this._splitLicensePlate(selectedVehicle.license_plate ?? '');
 
-            this.formData.patchValue({
-                ...selectedVehicle,
-                licenseLetters: letters,
-                licenseNumber: number,
-                province: provinceName,
-                regeister_date: selectedVehicle.registration_date,
-                tax_due_date: selectedVehicle.notificate_tax,
-            });
+        this.formData.patchValue({
+            ...selectedVehicle,
+            licenseLetters: parts.letters,
+            licenseNumber: parts.number,
+            province: provinceName,
+            regeister_date: selectedVehicle.registration_date,
+            tax_due_date: selectedVehicle.notificate_tax,
+        });
 
-            this._changeDetectorRef.detectChanges();
-            this.getFueltype(selectedVehicle.fuel_type);
-        }
+        this._changeDetectorRef.detectChanges();
+        this.getFueltype(selectedVehicle.fuel_type);
 
         if (selectedVehicle.id) {
             this._Service
                 .getCusCarItem(selectedVehicle.id)
                 .subscribe((resp) => {
-                    // console.log('resp',resp.data);
                     this.formData_CusCar.patchValue({ ...resp.data });
                     if (resp.data.customer_id) {
 
@@ -2007,65 +2010,13 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
                             this._fuseConfirm,
                             () => {
                                 this._Service.getCustomerID(resp.data.customer_id).subscribe((resp) => {
-                                    this.customerCtrl.setValue(resp.data, { emitEvent: false });
-                                    this.customerID = resp.data.id;
-
-                                    this.formData.patchValue({
-                                        customer_id: resp.data.id,
-                                        type: resp.data.type,
-                                        name: resp.data.name,
-                                        lname: resp.data.lname,
-                                        tax_id: resp.data.tax_id,
-                                        email: resp.data.email,
-                                        phone_number1: resp.data.phone_number1,
-                                        phone_number2: resp.data.phone_number2,
-                                        note: resp.data.note,
-                                        is_headquarter: resp.data.is_headquarter,
+                                    this.patchCustomerFromApi(resp.data, {
+                                        openAddressDialog: true,
                                     });
-
-                                    this.formData_CusData.patchValue({
-                                        ...resp.data,
-                                    });
-                                    const addressArray = this.formData_CusData.get(
-                                        'address_arr'
-                                    ) as FormArray;
-                                    addressArray.clear();
-
-                                    resp.data.customer__addresses.forEach(
-                                        (address: any) => {
-                                            addressArray.push(
-                                                this._formBuilder.group({
-                                                    id: address.id,
-                                                    address: address.address,
-                                                    zip_code: address.zip_code,
-                                                    is_main: address.is_main,
-                                                    province_name:
-                                                        address.provinces?.name_th,
-                                                    district_name:
-                                                        address.districts?.name_th,
-                                                    subdistrict_name:
-                                                        address.sub_districts
-                                                            ?.name_th,
-                                                    province_id:
-                                                        address.province_id,
-                                                    district_id:
-                                                        address.district_id,
-                                                    subdistrict_id:
-                                                        address.subdistrict_id,
-                                                })
-                                            );
-                                        }
-                                    );
-                                    this.openAddressSelectionDialog();
                                 });
                             }
                         );
-
                     }
-                    console.log(
-                        'this.formData_CusCar',
-                        this.formData_CusCar.value
-                    );
                 });
             this.forceCall(selectedVehicle.id);
             this.cusCarGasCache = selectedVehicle;
@@ -2080,70 +2031,22 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
      */
     customerID: number;
     onCustomerSelected(customer: any): void {
-        if (customer) {
-            this.formData.patchValue({
-                type: customer.type,
-                name: customer.name,
-                lname: customer.lname,
-                tax_id: customer.tax_id,
-                email: customer.email,
-                phone_number1: customer.phone_number1,
-                phone_number2: customer.phone_number2,
-                note: customer.note,
-                is_headquarter: customer.is_headquarter,
-            });
+        if (!customer?.id) {
+            return;
         }
-
-        if (customer.id) {
-            this._Service.getCustomerID(customer.id).subscribe((resp) => {
-                console.log('resp', resp.data);
-
-                this.customerID = resp.data.id;
-
-                this.formData_CusData.patchValue({
-                    ...resp.data,
-                });
-                const addressArray = this.formData_CusData.get(
-                    'address_arr'
-                ) as FormArray;
-                addressArray.clear();
-
-                resp.data.customer__addresses.forEach((address: any) => {
-                    addressArray.push(
-                        this._formBuilder.group({
-                            id: address.id,
-                            address: address.address,
-                            zip_code: address.zip_code,
-                            is_main: address.is_main,
-                            province_name: address.provinces?.name_th,
-                            district_name: address.districts?.name_th,
-                            subdistrict_name: address.sub_districts?.name_th,
-                            province_id: address.province_id,
-                            district_id: address.district_id,
-                            subdistrict_id: address.subdistrict_id,
-                        })
-                    );
-                });
-                console.log(
-                    'this.formData_CusData',
-                    this.formData_CusData.value
-                );
-                this.openAddressSelectionDialog();
-            });
-        }
+        this.formData.patchValue(
+            {
+                name: customer.name ?? '',
+                lname: customer.lname ?? '',
+            },
+            { emitEvent: false }
+        );
+        this._Service.getCustomerID(customer.id).subscribe((resp) => {
+            this.patchCustomerFromApi(resp.data, { openAddressDialog: true });
+        });
     }
 
-    /**
-     * กรองข้อมูลนำหน้าชื่อ
-     */
-    customerTitles = {
-        personal: ['คุณ', 'นาย', 'นางสาว', 'นาง'],
-        vendor: ['บริษัท', 'ห้างหุ้นส่วนจำกัด'],
-        agent: ['คุณ', 'นาย', 'นางสาว', 'นาง', 'บริษัท', 'ห้างหุ้นส่วนจำกัด'],
-    };
-    filteredTitles: string[] = [];
     onCustomerTypeChange(type: string): void {
-        this.filteredTitles = this.customerTitles[type] || [];
         if (type === 'vendor') {
             this.formData.addControl('is_headquarter', new FormControl(true));
         } else {
@@ -2151,8 +2054,95 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         }
     }
 
-    onTitleSelected(title: string): void {
-        this.title = title;
+    get hasLinkedCustomer(): boolean {
+        return !!this.formData?.get('customer_id')?.value;
+    }
+
+    /** สรุปลูกค้aที่เชื่อมแล้ว (ไม่แสดง customer id) */
+    get linkedCustomerSummary(): string {
+        const no = this.formData_CusData?.get('no')?.value;
+        const first = (this.formData?.get('name')?.value ?? '').toString().trim();
+        const last = (this.formData?.get('lname')?.value ?? '').toString().trim();
+        const namePart = [first, last].filter(Boolean).join(' ').trim();
+        if (no && namePart) {
+            return `${no} · ${namePart}`;
+        }
+        return no || namePart || 'ลูกค้าในระบบ';
+    }
+
+    clearLinkedCustomer(): void {
+        this.customerID = null;
+        this.formData.patchValue({ customer_id: null }, { emitEvent: false });
+        this._changeDetectorRef.markForCheck();
+    }
+
+    /** เปิดไฮไลต์ช่องบังคับหลังกดบันทึก */
+    saveValidationAttempted = false;
+    /** ยังไม่เลือกบริการอย่างน้อย 1 รายการ */
+    serviceRequireError = false;
+
+    fieldHasError(controlName: string): boolean {
+        if (!this.saveValidationAttempted) {
+            return false;
+        }
+        const control = this.formData.get(controlName);
+        return !!control && control.invalid;
+    }
+
+    patchCustomerFromApi(
+        data: any,
+        options: { openAddressDialog?: boolean } = {}
+    ): void {
+        if (!data) {
+            return;
+        }
+
+        const type = data.type || 'personal';
+        this.onCustomerTypeChange(type);
+        this.customerID = data.id;
+
+        this.formData.patchValue(
+            {
+                customer_id: data.id,
+                type,
+                name: data.name ?? '',
+                lname: data.lname ?? '',
+                tax_id: data.tax_id,
+                email: data.email,
+                phone_number1: data.phone_number1,
+                phone_number2: data.phone_number2,
+                note: data.note,
+                is_headquarter: data.is_headquarter,
+            },
+            { emitEvent: false }
+        );
+
+        this.formData_CusData.patchValue({ ...data }, { emitEvent: false });
+        const addressArray = this.formData_CusData.get('address_arr') as FormArray;
+        addressArray.clear();
+
+        (data.customer__addresses ?? []).forEach((address: any) => {
+            addressArray.push(
+                this._formBuilder.group({
+                    id: address.id,
+                    address: address.address,
+                    zip_code: address.zip_code,
+                    is_main: address.is_main,
+                    province_name: address.provinces?.name_th,
+                    district_name: address.districts?.name_th,
+                    subdistrict_name: address.sub_districts?.name_th,
+                    province_id: address.province_id,
+                    district_id: address.district_id,
+                    subdistrict_id: address.subdistrict_id,
+                })
+            );
+        });
+
+        this._changeDetectorRef.markForCheck();
+
+        if (options.openAddressDialog) {
+            this.openAddressSelectionDialog();
+        }
     }
 
     /**
@@ -2201,7 +2191,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
             });
 
             this.closeDialog();
-            console.log('this.formData', this.formData.value);
         }
     }
 
@@ -2272,7 +2261,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
             if (result === 'confirmed') {
                 const formValue = this.formData_addresscustomer.value;
                 formValue.is_main = formValue.is_main ? 1 : 0; // เปลี่ยน 0 1
-                console.log('formValue', formValue);
 
                 const observable = this.editAddressId
                     ? this._Service.updateCusAddress(
@@ -2324,7 +2312,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
                             });
                     },
                     error: (err) => {
-                        console.log(err);
                     },
                 });
             }
@@ -2476,7 +2463,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
             this.selectedFuelType = fuelType;
         }
         this.formData.patchValue({ fuel_type: this.selectedFuelType });
-        console.log(this.formData.value.fuel_type);
     }
 
     /**
@@ -2495,15 +2481,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
     // #region CRUD Operations
 
     create(): void {
-        const typedCustomer = this.customerCtrl?.value;
-
-        if (!this.formData.get('customer_id')?.value && typeof typedCustomer === 'string') {
-            const nameText = typedCustomer.trim();
-            if (nameText) {
-                this.formData.patchValue({ name: this.title + ' ' + nameText }); // ✅ ส่งชื่อได้แน่นอน
-            }
-        }
-
         const rawLicensePlate = this.formData.controls['license_plate'].value;
         const cleanedLicensePlate = rawLicensePlate
             ? rawLicensePlate.replace(/\s|/g, '')
@@ -2541,6 +2518,8 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
             tax_renewal_date: tax_renewal_date,
             appointment: appointment,
         });
+        this.saveValidationAttempted = true;
+        this.serviceRequireError = false;
         this.formData.markAllAsTouched();
         this._changeDetectorRef.detectChanges();
 
@@ -2565,6 +2544,8 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
             return;
         }
         if (!this.isAtLeastOneService()) {
+            this.serviceRequireError = true;
+            this._changeDetectorRef.detectChanges();
             this._US.confirmAction(
                 'กรุณาระบุบริการ',
                 'กรุณาระบุบริการอย่างน้อย 1 รายการ',
@@ -2647,16 +2628,8 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
                                         this.formData_CusCar.patchValue({
                                             ...resp.data,
                                         });
-                                        console.log(
-                                            'this.formData_CusCar',
-                                            this.formData_CusCar.value
-                                        );
 
                                         this.cusCarGasCache = resp.data;
-                                        console.log(
-                                            'cusCarGasCache',
-                                            this.cusCarGasCache
-                                        );
                                     },
                                     error: (error: any) => {
                                         this.handleApiError(error);
@@ -2765,9 +2738,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
      * @param request string อะไรก็ได้ ส่งเพื่อระบุว่าต้องการดำเนินการอื่นเพิ่มเติมเมื่อทำการปิด dialog Ref นั้น ๆ
      */
     closeDialog(Ref?: any, request?: string): void {
-        console.log('Ref', Ref);
-        console.log('request', request);
-
         if (Ref && request) {
             switch (Ref) {
                 case this.actPeriodRef:
@@ -2955,7 +2925,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
     //             this.formData.patchValue({
     //                 address: `${result.address} ${result.subdistricts} ${result.districts} ${result.province} ${result.zip_code}`,
     //             });
-    //             console.log('result',result);
 
     //             this.addressDialogRef = result;
     //         }
@@ -3452,12 +3421,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
      */
     lackOfTaxYear(year: number): void {
         const nowTaxDate = new Date(this.formData.get('tax_due_date').value);
-        console.log('nowTaxDate', nowTaxDate);
-        console.log(
-            'this.formData.get(tax_due_date)',
-            this.formData.get('tax_due_date').value
-        );
-
         nowTaxDate.setFullYear(year - 543);
 
         this.formData
@@ -3942,7 +3905,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
 
         this._Service.createGas(payload).subscribe(
             (response) => {
-                console.log('Gas data saved successfully', response);
                 // this.closeDialog(this.addGasDialogRef)
                 this.loadGasData(this.cusCarGasCache.id);
                 // this.closeDialog(this.addGasDialogRef);
@@ -4090,8 +4052,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
 
     update_CusData(): void {
         // this._US.updateItem(this.formData, this._Service, this._fuseConfirm, this.submitForm.bind(this), this.updateResp);
-        console.log('aasd', this.formData_CusData.value);
-
         this._Service
             .updateCus(this.formData_CusData.value, this.formData_CusData.value.id)
             .subscribe({
@@ -4107,14 +4067,10 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
                     //     )
                     //     .subscribe({
                     //         next: (resp) => {},
-                    //         error: (error) => {
-                    //             console.log(error);
-                    //         },
+                    //         error: (error) => { },
                     //     });
                 },
-                error: (error) => {
-                    console.log(error);
-                },
+                error: (error) => { },
             });
         // this.closeDialog();
         // this.rerender();
@@ -4351,7 +4307,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
             const newVAT = currentVAT === 1 ? 0 : 1;
             control.patchValue({ is_vat: newVAT });
         }
-        console.log('List_service_tran', this.formData.value.List_service_tran);
         this.sumTotal();
     }
 
@@ -4365,7 +4320,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         });
 
         dialogRef.afterClosed().subscribe((result) => {
-            console.log(result);
             if (result.data.type === 'later') {
                 this.formData.patchValue({
                     ems_province_id: null,
@@ -4374,10 +4328,8 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
                     ems_address: null,
                     ems_name: null,
                 });
-                console.log('formdata', this.formData.value);
             } else if (result.data.type === 'same') {
                 //
-                console.log('formdata', this.formData.value);
             } else if (result.data.type === 'new') {
                 this.formData.patchValue({
                     ems_province_id: result.data.province_id,
@@ -4386,7 +4338,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
                     ems_address: result.data.address,
                     ems_name: result.data.name,
                 });
-                console.log('formdata', this.formData.value);
             }
         });
     }
@@ -4402,62 +4353,10 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         });
 
         dialogRef.afterClosed().subscribe((result) => {
-            if (result && value === 'LIST') {
-                // ✅ 2) ล็อกค่าที่จะส่งบันทึกไว้ใน formData
-                this.customerID = result.customer.id;
-
-                this.formData.patchValue({
-                    customer_id: result.customer.id,
-                    type: result.customer.type,
-                    name: result.customer.name,
-                    lname: result.customer.lname,
-                    tax_id: result.customer.tax_id,
-                    email: result.customer.email,
-                    phone_number1: result.customer.phone_number1,
-                    phone_number2: result.customer.phone_number2,
-                    note: result.customer.note,
-                    is_headquarter: result.customer.is_headquarter,
+            if (result && value === 'LIST' && result.customer?.id) {
+                this._Service.getCustomerID(result.customer.id).subscribe((resp) => {
+                    this.patchCustomerFromApi(resp.data, { openAddressDialog: true });
                 });
-
-                if (result.customer) {
-                    this._Service.getCustomerID(result.customer.id).subscribe((resp) => {
-                        console.log('resp', resp.data);
-
-                        this.customerID = resp.data.id;
-
-                        this.formData_CusData.patchValue({
-                            ...resp.data,
-                        });
-                        const addressArray = this.formData_CusData.get(
-                            'address_arr'
-                        ) as FormArray;
-                        addressArray.clear();
-
-                        resp.data.customer__addresses.forEach((address: any) => {
-                            addressArray.push(
-                                this._formBuilder.group({
-                                    id: address.id,
-                                    address: address.address,
-                                    zip_code: address.zip_code,
-                                    is_main: address.is_main,
-                                    province_name: address.provinces?.name_th,
-                                    district_name: address.districts?.name_th,
-                                    subdistrict_name: address.sub_districts?.name_th,
-                                    province_id: address.province_id,
-                                    district_id: address.district_id,
-                                    subdistrict_id: address.subdistrict_id,
-                                })
-                            );
-                        });
-                        console.log(
-                            'this.formData_CusData',
-                            this.formData_CusData.value
-                        );
-                        this.openAddressSelectionDialog();
-                    });
-                }
-            } else {
-                console.log('no data');
             }
         });
     }
@@ -4513,15 +4412,38 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         });
     }
 
+    /** เปิดช่องรายละเอียdเมื่อบริการ 14/15 ถูกเลือก หรือมีข้อความใน DB (โหลดบิล) */
+    private syncRemarkFieldVisibility(billData?: {
+        remark?: string | null;
+        remark_transport?: string | null;
+    }): void {
+        const isServiceOn = (serviceId: number): boolean => {
+            const ctrl = this.servicesFormArray.controls.find(
+                (c) => Number(c.get('service_id')?.value) === serviceId
+            );
+            const st = ctrl?.get('status')?.value;
+            return st === true || st === 1 || st === '1';
+        };
+        const hasText = (v: string | null | undefined) =>
+            v != null && String(v).trim() !== '';
+
+        // index 13 = งานทะเบียn (service 14) → remark_transport
+        // index 14 = อืnๆ (service 15) → remark
+        this.isOtherChecked =
+            isServiceOn(14) || hasText(billData?.remark_transport);
+        this.isOther2Checked =
+            isServiceOn(15) || hasText(billData?.remark);
+    }
+
     clearOtherValues(): void {
         this.formData.patchValue({
-            other_remark: null,
+            remark_transport: '',
         });
     }
 
     clearOther2Values(): void {
         this.formData.patchValue({
-            other2_remark: null,
+            remark: '',
         });
     }
 
@@ -4532,94 +4454,4 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         });
     }
 
-    displayCustomer = (c: any): string => {
-        if (!c) return '';
-        if (typeof c === 'string') return c;   // ตอนพิมพ์ค้นหา
-        return (c.name ?? '').trim();          // ✅ หลังเลือกให้โชว์แค่ชื่อ
-    };
-
-    onCustomerSelected2(result: any) {
-        if (!result) return;
-
-        this.customerID = result.id;
-
-        // ✅ ทำให้ input แสดงถูก และไม่ให้ valueChanges ไปทำ logic เคลียร์/ค้นหา
-        this.customerCtrl.setValue(result, { emitEvent: false });
-
-        // ✅ ล็อกค่าที่จะใช้บันทึกลง formData แน่นอน
-        this.formData.patchValue({
-            customer_id: result.id,
-            type: result.type,
-            name: result.name ?? '',
-            lname: result.lname ?? '',
-            tax_id: result.tax_id,
-            email: result.email,
-            phone_number1: result.phone_number1,
-            phone_number2: result.phone_number2,
-            note: result.note,
-            is_headquarter: result.is_headquarter,
-        }, { emitEvent: false });
-
-        this._Service.getCustomerID(result.id).subscribe((resp) => {
-            const data = resp?.data;
-            if (!data) return;
-
-            // ✅ ถ้า API คืนค่าล่าสุดมา ให้ทับ formData อีกที (กัน name หาย)
-            this.formData.patchValue({
-                customer_id: data.id,
-                type: data.type,
-                name: data.name ?? '',
-                lname: data.lname ?? '',
-                tax_id: data.tax_id,
-                email: data.email,
-                phone_number1: data.phone_number1,
-                phone_number2: data.phone_number2,
-                note: data.note,
-                is_headquarter: data.is_headquarter,
-            }, { emitEvent: false });
-
-            this.formData_CusData.patchValue({ ...data }, { emitEvent: false });
-
-            const addressArray = this.formData_CusData.get('address_arr') as FormArray;
-            addressArray.clear();
-
-            (data.customer__addresses ?? []).forEach((address: any) => {
-                addressArray.push(this._formBuilder.group({
-                    id: address.id,
-                    address: address.address,
-                    zip_code: address.zip_code,
-                    is_main: address.is_main,
-                    province_name: address.provinces?.name_th,
-                    district_name: address.districts?.name_th,
-                    subdistrict_name: address.sub_districts?.name_th,
-                    province_id: address.province_id,
-                    district_id: address.district_id,
-                    subdistrict_id: address.subdistrict_id,
-                }));
-            });
-
-            this.openAddressSelectionDialog();
-        });
-    }
-
-
-    openAutoPanelIfHasData() {
-        // ✅ เวลา focus แล้วมีรายการค้างอยู่ ให้เปิด panel
-        if (this.customers.length > 0) {
-            this.safeOpenPanel();
-        }
-    }
-
-    private safeOpenPanel() {
-        // ต้องรอให้ Angular render options ก่อน
-        setTimeout(() => {
-            if (this.autoTrigger) this.autoTrigger.openPanel();
-        }, 0);
-    }
-
-    private safeClosePanel() {
-        setTimeout(() => {
-            if (this.autoTrigger) this.autoTrigger.closePanel();
-        }, 0);
-    }
 }

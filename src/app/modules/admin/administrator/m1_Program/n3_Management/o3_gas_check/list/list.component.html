@@ -152,8 +152,7 @@
 <ng-template #Dialog>
     <div class="flex flex-col">
         <form [formGroup]="formData">
-            <h2 mat-dialog-title *ngIf="!isEdit">เพิ่มเลขต่อ พ.ร.บ.</h2>
-            <h2 mat-dialog-title *ngIf="isEdit">แก้ไขเลขต่อ พ.ร.บ.</h2>
+            <app-dialog-header [title]="isEdit ? 'แก้ไขเลขต่อ พ.ร.บ.' : 'เพิ่มเลขต่อ พ.ร.บ.'" (closeClick)="closeDialog()"></app-dialog-header>
             <mat-dialog-content>
                 <!-- REPLACE CONTENT mt-2-->
                 <div class="flex flex-row w-full mt-2 space-x-4 lg:w-4/4">

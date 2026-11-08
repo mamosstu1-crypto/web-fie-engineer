@@ -69,10 +69,11 @@
 <ng-template #Dialog>
     <div class="flex flex-col">
         <form [formGroup]="formData">
-            <h2 mat-dialog-title *ngIf="!isEdit && this.type === 'deposit'">เพิ่มรายการรับเข้าอะไหล่</h2>
-            <h2 mat-dialog-title *ngIf="isEdit  && this.type === 'deposit'">แก้ไขรายการรับเข้าอะไหล่</h2>
-            <h2 mat-dialog-title *ngIf="!isEdit && this.type === 'withdraw'">เพิ่มรายการเบิกออกอะไหล่</h2>
-            <h2 mat-dialog-title *ngIf="isEdit  && this.type === 'withdraw'">แก้ไขรายการเบิกออกอะไหล่</h2>
+            <app-dialog-header
+                [title]="isEdit
+                    ? (type === 'deposit' ? 'แก้ไขรายการรับเข้าอะไหล่' : 'แก้ไขรายการเบิกออกอะไหล่')
+                    : (type === 'deposit' ? 'เพิ่มรายการรับเข้าอะไหล่' : 'เพิ่มรายการเบิกออกอะไหล่')"
+                (closeClick)="closeDialog()"></app-dialog-header>
             <mat-dialog-content>
                 <!-- REPLACE CONTENT mt-2-->
                 <div class="flex flex-col w-full mt-2 lg:w-4/4">

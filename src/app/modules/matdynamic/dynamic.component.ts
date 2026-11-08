@@ -1,13 +1,14 @@
 import { ChangeDetectorRef, Component, EventEmitter, Host, Input, OnInit, Optional, Output, SkipSelf } from '@angular/core';
 import { ControlContainer, FormControl, FormGroup } from '@angular/forms';
-import { FormDataService } from 'app/modules/matdynamic/form-data.service'
+import { FormDataService } from 'app/modules/matdynamic/form-data.service';
+import { resolveRequiredMark } from 'app/modules/matdynamic/form-required.util';
 import { Observable } from 'rxjs';
 
 @Component({
     selector: 'mff',
     template: `
-        <mat-form-field>
-            <mat-label>{{ label }}</mat-label>
+        <mat-form-field hideRequiredMarker>
+            <mat-label>{{ label }}<span *ngIf="showRequiredMark" class="bill-required-star">*</span></mat-label>
             <input matInput min="0"
                 [formControl]="formGroup.get(fCN)"
                 [placeholder]="pHold"
@@ -25,8 +26,11 @@ export class MffComponent implements OnInit {
     @Input() form?: FormGroup; // Allow form to be passed as Input
     @Input() readonly: boolean = false; // Add readonly input
     @Input() type: string = 'text'; // Add type input, default to 'text'
+    /** ไม่ส่ง = อ่านจาก Validators.required ของ control */
+    @Input() requiredMark?: boolean;
 
     public formGroup!: FormGroup;
+    showRequiredMark = false;
 
     constructor(
         @Optional() @Host() @SkipSelf() private controlContainer: ControlContainer
@@ -35,14 +39,16 @@ export class MffComponent implements OnInit {
     ngOnInit(): void {
         // If form input is provided, use it; otherwise, use form from ControlContainer
         this.formGroup = this.form || (this.controlContainer?.control as FormGroup);
+        const control = this.formGroup?.get(this.fCN);
+        this.showRequiredMark = resolveRequiredMark(this.requiredMark, control);
     }
 }
 
 @Component({
     selector: 'mffa',
     template: `
-        <mat-form-field>
-            <mat-label>{{ label }}</mat-label>
+        <mat-form-field hideRequiredMarker>
+            <mat-label>{{ label }}<span *ngIf="showRequiredMark" class="bill-required-star">*</span></mat-label>
             <input matInput [formControl]="fCN" [placeholder]="pHold">
         </mat-form-field>
     `,
@@ -53,8 +59,10 @@ export class MffaComponent implements OnInit {
     @Input() fCN!: string;
     @Input() pHold!: string;
     @Input() form: string = 'formData'; // Default value
+    @Input() requiredMark?: boolean;
 
     public formControl!: FormControl; // Will be assigned from the formGroup
+    showRequiredMark = false;
 
     constructor(
         private _formDataService: FormDataService,
@@ -68,6 +76,7 @@ export class MffaComponent implements OnInit {
         const formGroup = this._formDataService.getFormGroup(this.form);
         // Retrieve the form control using the formControlName
         this.formControl = formGroup?.get(this.fCN) as FormControl;
+        this.showRequiredMark = resolveRequiredMark(this.requiredMark, this.formControl);
         this.cdr.detectChanges();
     }
 }
@@ -98,8 +107,8 @@ export class MffvComponent {
 @Component({
     selector: 'mfs',
     template: `
-        <mat-form-field>
-            <mat-label>{{ label }}</mat-label>
+        <mat-form-field hideRequiredMarker>
+            <mat-label>{{ label }}<span *ngIf="showRequiredMark" class="bill-required-star">*</span></mat-label>
             <input matInput [formControl]="formControl" [matAutocomplete]="auto" />
             <mat-autocomplete #auto="matAutocomplete">
                 <mat-option *ngFor="let item of sift | async" [value]="item[KEY]">
@@ -116,8 +125,10 @@ export class MfsComponent implements OnInit {
     @Input() KEY!: string;
     @Input() KEYid: string = 'id';
     @Input() sift!: Observable<any[]>;
+    @Input() requiredMark?: boolean;
 
     public formControl!: FormControl;
+    showRequiredMark = false;
 
     constructor(
         @Optional() @Host() @SkipSelf() private controlContainer: ControlContainer
@@ -130,6 +141,7 @@ export class MfsComponent implements OnInit {
         // ตรวจสอบว่ามี formGroup และฟอร์มคอนโทรลที่กำหนดไว้หรือไม่
         if (formGroup && this.fCN) {
             this.formControl = formGroup.get(this.fCN) as FormControl;
+            this.showRequiredMark = resolveRequiredMark(this.requiredMark, this.formControl);
         }
     }
 }

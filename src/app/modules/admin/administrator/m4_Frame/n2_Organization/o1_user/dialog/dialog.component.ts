@@ -78,7 +78,6 @@ export class DialogComponent implements OnInit {
 
     Submit() {
         let formValue = this.form.value;
-        console.log('this.form', this.form.value);
 
         const confirmation = this.fuseConfirmationService.open({
             title: 'ยืนยันการบันทึกข้อมูล',

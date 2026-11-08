@@ -1,11 +1,3 @@
-// mat-form-field, mff {
-//     margin-top: -1.75rem;
-
-//     mat-label {
-//         font-weight: 700 !important;
-//     }
-// }
-
 label { padding-bottom: 1rem; }
 
 mat-radio-group {
@@ -17,7 +9,26 @@ mat-radio-group {
     }
 }
 
-// Apply styles to buttons as needed
 button, .span {
     font-family: 'Prompt';
+}
+
+/* dialog เปิดใน overlay — อย่าผูกกับ :host; * แดงดู global ใน styles/styles.scss ด้วย */
+.bill-required-star {
+    color: #ef4444 !important;
+    margin-left: 0.25em;
+    font-weight: 600;
+}
+
+::ng-deep form.fie-required-form {
+    .mat-form-field-required-marker {
+        display: none !important;
+    }
+
+    mat-form-field.mat-form-field-invalid .mat-form-field-label mat-label,
+    mat-form-field.mat-focused .mat-form-field-label mat-label {
+        .bill-required-star {
+            color: #ef4444 !important;
+        }
+    }
 }

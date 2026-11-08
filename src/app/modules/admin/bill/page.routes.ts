@@ -143,7 +143,7 @@ export const documentRoute: Route[] = [
                     service: () => inject(StockService).getService(),
                     customer: () => inject(StockService).getCustomer(),
                     branch: () => inject(StockService).getBranch(),
-                    invoice: () => inject(StockService).getInvoice(),
+                    invoice: () => inject(StockService).getInvoicesForBilling(),
                 },
                 data: {
                     status: 'billing'

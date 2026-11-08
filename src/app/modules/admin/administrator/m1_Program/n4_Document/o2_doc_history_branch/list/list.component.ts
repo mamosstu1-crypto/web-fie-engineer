@@ -91,7 +91,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
             this.listDocData = resp.data;
          });
         this._Service.getInspection().subscribe((resp) => { this.listInspection = resp; });
-        console.log('this.listInspection', this.listInspection);
 
         this.filteredDoc = this.docControl.valueChanges.pipe(
             startWith(''),
@@ -177,7 +176,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private _filterDoc(value: string): any[] {
         const filterValue = value.toString().toLowerCase();
-        console.log('asd',this.listDocData);
 
         // return this.listDocData.filter(item =>
         //     item?.name.toLowerCase().includes(filterValue) ||
@@ -197,6 +195,5 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         });
 
         this.docControl.setValue(`${selectedDoc.no} ${selectedDoc.name}`);
-        console.log('this.formData', this.formData.value);
     }
 }

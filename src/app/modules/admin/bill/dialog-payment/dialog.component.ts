@@ -82,9 +82,6 @@ export class DialogPayment implements OnInit {
     }
 
     ngOnInit(): void {
-        console.log(this.data);
-        console.log(this.invoice_payment);
-
         if (this.data.WithHoldTax !== 0) {
             this.form.patchValue({
                 invoice_id: this.data.id,

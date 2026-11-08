@@ -61,14 +61,13 @@
 <ng-template #Dialog>
     <div class="flex flex-col">
         <form [formGroup]="formData">
-            <h2 mat-dialog-title *ngIf="!isEdit">สร้างผู้ใช้งาน</h2>
-            <h2 mat-dialog-title *ngIf="isEdit">แก้ไขผู้ใช้งาน</h2>
+            <app-dialog-header [title]="isEdit ? 'แก้ไขผู้ใช้งาน' : 'สร้างผู้ใช้งาน'" (closeClick)="closeDialog()"></app-dialog-header>
             <mat-dialog-content>
                 <!-- REPLACE CONTENT mt-2-->
                 <div class="flex flex-col w-full lg:w-4/4 mt-2">
                     <mff [class]="'w-full'" [label]="'ชื่อผู้ใช้งาน'" [fCN]="'username'" [pHold]="'ชื่อผู้ใช้งาน'"></mff>
-                    <mat-form-field appearance="fill" class="w-full">
-                        <mat-label>เลือกพนักงาน</mat-label>
+                    <mat-form-field appearance="fill" class="w-full" hideRequiredMarker>
+                        <mat-label>เลือกพนักงาน<span class="bill-required-star">*</span></mat-label>
                         <mat-select [formControlName]="'employees_id'">
                             <mat-option *ngFor="let item of listEmployee" [value]="item.id">
                                 {{ item.first_name }} {{ item.last_name }}

@@ -275,12 +275,10 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         if (event) {
             event.stopPropagation();
         }
-        console.log('item dialog', item);
 
         item
             ? (this.formData.patchValue(item), (this.isEdit = true))
             : (this.isEdit = false);
-        console.log('item dialog formdata', this.formData.value);
 
         this._US.openDialog(
             this._matDialog,
@@ -399,7 +397,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
             if (this.insurance_nameFilter.invalid) {
                 this.insurance_nameFilter.markAsTouched();
             }
-            console.log('No Insurance Selected');
             this.rerender();
             return;
         }
@@ -413,7 +410,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
             if (this.insurance_nameFilter.invalid) {
                 this.insurance_nameFilter.markAsTouched();
             }
-            console.log('No Insurance Found');
             return;
         }
     }

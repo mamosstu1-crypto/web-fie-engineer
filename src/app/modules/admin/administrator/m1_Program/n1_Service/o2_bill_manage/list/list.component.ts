@@ -21,6 +21,7 @@ import { fuseAnimations } from '@fuse/animations';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { Service } from '../page.service';
 import { DataTableDirective } from 'angular-datatables';
+import { ADTSettings } from 'angular-datatables/src/models/settings';
 import {
     UtilityService,
     DATE_TH_FORMATS,
@@ -60,6 +61,7 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
     // Properties and ViewChilds
     public dtOptions: DataTables.Settings = {};
     public dtOptions2: DataTables.Settings = {};
+    dtTrigger: Subject<ADTSettings> = new Subject<ADTSettings>();
     public dataRow1: any[] = [];
     public dataRow2: any[] = [];
     public formData: FormGroup;
@@ -76,6 +78,7 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
     public billId: number;
     public billStatus: string;
     public selectedStatus: string = '';
+    private tableSearchValue: string = '';
     public user: any;
 
     @ViewChildren(DataTableDirective) dtElements: QueryList<DataTableDirective>;
@@ -172,8 +175,21 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
             });
         }
     }
-    ngAfterViewInit(): void { }
+    ngAfterViewInit(): void {
+        setTimeout(() => {
+            this.dtTrigger.next(this.dtOptions as ADTSettings);
+            this.resetTableScroll();
+        }, 200);
+    }
+
+    private resetTableScroll(): void {
+        const el = document.querySelector('.bill-scroll') as HTMLElement | null;
+        if (el) {
+            el.scrollLeft = 0;
+        }
+    }
     ngOnDestroy(): void {
+        this.dtTrigger.unsubscribe();
         this._unsubscribeAll.next(null);
         this._unsubscribeAll.complete();
     }
@@ -186,8 +202,10 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
             displayStart: this.start,
             serverSide: true,
             processing: true,
-            responsive: true,
+            responsive: false,
             order: [],
+            ordering: false,
+            orderCellsTop: true,
             language: {
                 url: 'https://cdn.datatables.net/plug-ins/1.11.3/i18n/th.json',
             },
@@ -199,6 +217,7 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
                         ? dataTablesParameters.order[0]
                         : { column: 1, dir: 'desc' };
                 dataTablesParameters.status = this.selectedStatus;
+                this.tableSearchValue = dataTablesParameters.search?.value ?? '';
                 const startDate =
                     this.formData.get('startDate')?.value ||
                     this._US.pdfDefaultDate('firstDayOfMonth');
@@ -229,6 +248,7 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
                             data: [],
                         });
                         this._changeDetectorRef.markForCheck();
+                        setTimeout(() => this.resetTableScroll(), 0);
                     });
             },
         };
@@ -351,7 +371,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
                 (loop: any) => loop.type === 'nonvat'
             );
             const vat = installments.find((loop: any) => loop.type === 'vat');
-            // console.log('nonVat', nonVat);
 
             this.formData.patchValue({
                 status: resp.data.status,
@@ -367,9 +386,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
                 now_paid: nonVat?.after_price ?? 0,
                 now_paid_vat: vat?.after_price ?? 0,
             });
-            console.log('resp', resp.data);
-            console.log('formdata', this.formData.value);
-
             this.formData
                 .get('last_price')
                 .patchValue(this.formData.get(this.paidState()).value);
@@ -501,7 +517,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         });
 
         const discountData = this.formData_PaidData.value;
-        console.log('checkdiscount', discountData);
         this._Service.pushDiscount(discountData, this.billId).subscribe({
             next: () => { },
             error: (err) => {
@@ -512,7 +527,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     async callInspectId(id: number): Promise<void> {
-        console.log('call id', id);
         this._Service.getInspectionsID(id).subscribe({
             next: (resp: any) => {
                 this.dataRow2 = resp.data;
@@ -537,8 +551,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         data2: any,
         specificId?: number
     ): Promise<void> {
-        console.log('this.alldata', this.alldata.inspection_vehicles[0].vehicle_service_transaction);
-
         const hasNonVat = this.alldata.inspection_vehicles[0].vehicle_service_transaction.some(
             (control) => control.is_vat === 0
         );
@@ -549,7 +561,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         if (hasNonVat && !hasVat) {
             this._Service.installment_add(data).subscribe({
                 next: () => {
-                    console.log('installdata', data);
                     if (specificId) {
                         this.callInspectId(specificId);
                         this.rerender();
@@ -564,7 +575,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         } else if (!hasNonVat && hasVat) {
             this._Service.installment_add(data2).subscribe({
                 next: () => {
-                    console.log('installdata', data2);
                     if (specificId) {
                         this.callInspectId(specificId);
                         this.rerender();
@@ -579,7 +589,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         } else if (hasNonVat && hasVat) {
             this._Service.installment_add(data).subscribe({
                 next: () => {
-                    console.log('installdata', data);
                     if (specificId) {
                         this.callInspectId(specificId);
                         this.rerender();
@@ -594,7 +603,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
 
             this._Service.installment_add(data2).subscribe({
                 next: () => {
-                    console.log('installdata', data2);
                     if (specificId) {
                         this.callInspectId(specificId);
                         this.rerender();
@@ -715,8 +723,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
     loadservice() {
         this._Service.getServices().subscribe((resp) => {
             const services = resp;
-            console.log('Service Data:', services);
-
             const serviceFormArray = this.formData.get(
                 'List_service_tran'
             ) as FormArray;
@@ -730,7 +736,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         this._router.navigate(['/bill_create/list'], {
             queryParams: { id: id, billStatus: billStatus },
         });
-        console.log('check id', id, 'state', billStatus);
     }
 
     get servicesFormArray(): FormArray {
@@ -749,21 +754,52 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         );
     }
 
-    pdfDay() {
+    formatCustomerDisplay(item: any): string {
+        const customer = item?.customers;
+        if (!customer) {
+            return '-';
+        }
+        const parts = [customer.name, customer.lname]
+            .map((v) => (v ?? '').toString().trim())
+            .filter(Boolean);
+        let full = parts.join(' ').trim();
+        if (!full) {
+            return '-';
+        }
+        if (full.startsWith('undefined ')) {
+            full = full.slice('undefined '.length).trim();
+        }
+        return full || '-';
+    }
+
+    private exportBranchId(): string {
+        return String(
+            this.user?.employees?.branch_id ?? this.user?.Employees?.branch_id ?? ''
+        );
+    }
+
+    private dailyExportDateParams(): { start: string; end: string } {
         const startDate =
             this.formData.get('startDate')?.value ||
             this._US.pdfDefaultDate('firstDayOfMonth');
         const endDate =
             this.formData.get('endDate')?.value ||
             this._US.pdfDefaultDate('lastDayOfMonth');
+        return {
+            start: this._US.pdfDateFormat(startDate),
+            end: this._US.pdfDateFormat(endDate),
+        };
+    }
 
-        const formatSDate = this._US.pdfDateFormat(endDate);
-        this._US.openPDF(
-            `${environment.API_URL}/api/report/reportExportPDFday?date=${formatSDate}`
+    pdfDay(): void {
+        const { start, end } = this.dailyExportDateParams();
+        window.open(
+            `${environment.API_URL}/api/report/reportExportPDFday?start_date=${start}&end_date=${end}&branch_id=${this.exportBranchId()}`,
+            '_blank'
         );
     }
 
-    pdfMonth() {
+    pdfMonth(): void {
         const startDate =
             this.formData.get('startDate')?.value ||
             this._US.pdfDefaultDate('firstDayOfMonth');
@@ -772,9 +808,32 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
             this._US.pdfDefaultDate('lastDayOfMonth');
         const formatSDate = this._US.pdfDateFormat(startDate);
         const formatEDate = this._US.pdfDateFormat(endDate);
+        window.open(
+            `${environment.API_URL}/api/report/reportExportPDFmonth?start_date=${formatSDate}&end_date=${formatEDate}&branch_id=${this.exportBranchId()}`,
+            '_blank'
+        );
+    }
 
-        this._US.openPDF(
-            `${environment.API_URL}/api/report/reportExportPDFmonth?start_date=${formatSDate}&end_date=${formatEDate}`
+    excelDay(): void {
+        const { start, end } = this.dailyExportDateParams();
+        window.open(
+            `${environment.API_URL}/api/report/excel/day?start_date=${start}&end_date=${end}&branch_id=${this.exportBranchId()}`,
+            '_blank'
+        );
+    }
+
+    excelMonth(): void {
+        const startDate =
+            this.formData.get('startDate')?.value ||
+            this._US.pdfDefaultDate('firstDayOfMonth');
+        const endDate =
+            this.formData.get('endDate')?.value ||
+            this._US.pdfDefaultDate('lastDayOfMonth');
+        const formatSDate = this._US.pdfDateFormat(startDate);
+        const formatEDate = this._US.pdfDateFormat(endDate);
+        window.open(
+            `${environment.API_URL}/api/report/excel/month?start_date=${formatSDate}&end_date=${formatEDate}&branch_id=${this.exportBranchId()}`,
+            '_blank'
         );
     }
 
@@ -902,7 +961,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         };
         this._Service.updatstatus(data, item.id).subscribe({
             next: () => {
-                console.log(`Status of item ${item.id} updated to ${status}`);
                 this.rerender();
             },
             error: (err) => {

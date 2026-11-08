@@ -330,20 +330,14 @@ export class VehicleDialogComponent implements OnInit {
     }
 
     onBrandChange(): void {
-        console.log(this.form.value);
-        
         this.isBrandSelected = this.form.value.brand_id !== '';
 
         if (this.isBrandSelected) {
             this._service.getVehicleModel(this.form.value.brand_id).subscribe(
                 (resp:any) => {
                     this.models = resp.data[0].vehicle_models || []
-                    console.log(this.models);
                 }
-             
-                
             );
-           
         }
     }
 }

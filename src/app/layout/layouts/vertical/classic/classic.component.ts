@@ -1,11 +1,12 @@
-import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 import { FuseNavigationService, FuseVerticalNavigationComponent } from '@fuse/components/navigation';
 import { Navigation } from 'app/core/navigation/navigation.types';
 import { NavigationService } from 'app/core/navigation/navigation.service';
-import { AuthService } from 'app/core/auth/auth.service';
+import { environment } from 'environments/environment';
 
 @Component({
     selector: 'classic-layout',
@@ -16,6 +17,7 @@ export class ClassicLayoutComponent implements OnInit, OnDestroy {
     isScreenSmall: boolean;
     navigation: Navigation;
     userData: any = null;
+    branchNameResolved = '';
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     /**
@@ -26,7 +28,9 @@ export class ClassicLayoutComponent implements OnInit, OnDestroy {
         private _router: Router,
         private _navigationService: NavigationService,
         private _fuseMediaWatcherService: FuseMediaWatcherService,
-        private _fuseNavigationService: FuseNavigationService
+        private _fuseNavigationService: FuseNavigationService,
+        private _httpClient: HttpClient,
+        private _changeDetectorRef: ChangeDetectorRef
     ) {
     }
 
@@ -51,10 +55,10 @@ export class ClassicLayoutComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         // Subscribe to navigation data
         this.userData = this._getStoredUser();
+        this._resolveBranchDisplayName();
         this._navigationService.navigation$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((navigation: Navigation) => {
-                // console.log(navigation);
                 // const user = JSON.parse(localStorage.getItem('user')) || null;
 
                 // // Store the access token in the local storage
@@ -98,11 +102,21 @@ export class ClassicLayoutComponent implements OnInit, OnDestroy {
     }
 
     get displayName(): string {
-        const firstName = this.userData?.employees?.first_name ?? '';
-        const lastName = this.userData?.employees?.last_name ?? '';
+        const emp = this._employeeRecord();
+        const firstName = emp?.first_name ?? '';
+        const lastName = emp?.last_name ?? '';
         const fullName = `${firstName} ${lastName}`.trim();
 
         return fullName || this.userData?.email || '-';
+    }
+
+    get branchDisplayLabel(): string {
+        return this.branchNameResolved || this._branchNameFromStoredUser();
+    }
+
+    get headerTooltip(): string {
+        const branch = this.branchDisplayLabel;
+        return branch ? `${this.displayName} — สาขา ${branch}` : this.displayName;
     }
 
     /**
@@ -140,5 +154,52 @@ export class ClassicLayoutComponent implements OnInit, OnDestroy {
         } catch {
             return null;
         }
+    }
+
+    private _employeeRecord(): any {
+        return this.userData?.employees ?? this.userData?.Employees ?? null;
+    }
+
+    private _branchNameFromStoredUser(): string {
+        const emp = this._employeeRecord();
+        if (!emp) {
+            return '';
+        }
+        if (emp.branch_display_name) {
+            return emp.branch_display_name;
+        }
+        const branch = emp.branches ?? emp.Branches;
+        return (branch?.business_name ?? branch?.name ?? '').trim();
+    }
+
+    private _resolveBranchDisplayName(): void {
+        const cached = this._branchNameFromStoredUser();
+        if (cached) {
+            this.branchNameResolved = cached;
+            return;
+        }
+
+        const branchId = this._employeeRecord()?.branch_id;
+        if (branchId == null || branchId === '') {
+            return;
+        }
+
+        this._httpClient
+            .get<any>(`${environment.API_URL}/api/Brache/showID/${branchId}`)
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe({
+                next: (response) => {
+                    const branch = response?.data ?? response;
+                    this.branchNameResolved = (
+                        branch?.business_name ??
+                        branch?.name ??
+                        ''
+                    ).trim();
+                    this._changeDetectorRef.markForCheck();
+                },
+                error: () => {
+                    this._changeDetectorRef.markForCheck();
+                },
+            });
     }
 }

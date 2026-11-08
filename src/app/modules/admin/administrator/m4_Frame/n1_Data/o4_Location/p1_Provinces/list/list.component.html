@@ -50,8 +50,7 @@
 <ng-template #Dialog>
     <div class="flex flex-col">
         <form [formGroup]="formData">
-            <h2 mat-dialog-title *ngIf="!isEdit">เพิ่มจังหวัด</h2>
-            <h2 mat-dialog-title *ngIf="isEdit">แก้ไขจังหวัด</h2>
+            <app-dialog-header [title]="isEdit ? 'แก้ไขจังหวัด' : 'เพิ่มจังหวัด'" (closeClick)="closeDialog()"></app-dialog-header>
             <mat-dialog-content>
                 <div class="flex flex-col w-full mt-2 gap-2">
                     <mat-form-field appearance="outline" class="w-full">

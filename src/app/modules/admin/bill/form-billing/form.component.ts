@@ -77,7 +77,7 @@ export class FormBillingComponent implements OnInit, AfterViewInit, OnDestroy {
         this.user = JSON.parse(localStorage.getItem('user'))
 
         this.Id = this._activatedRoute.snapshot.paramMap.get('id');
-        this.itemProduct = this._activatedRoute.snapshot.data.invoice
+        this.itemProduct = this._activatedRoute.snapshot.data.invoice ?? [];
         this.filterItem.next(this.itemProduct.slice());
 
         this.customer = this._activatedRoute.snapshot.data.customer.data
@@ -226,6 +226,68 @@ export class FormBillingComponent implements OnInit, AfterViewInit, OnDestroy {
         this._onDestroy.complete();
     }
 
+    private buildBillingPayload(): Record<string, unknown> | null {
+        const raw = this.form.value;
+        if (!raw.billing_invoices?.length) {
+            this._fuseConfirmationService.open({
+                title: 'กรุณาระบุข้อมูล',
+                message: 'กรุณาเลือกใบแจ้งหนี้อย่างน้อย 1 รายการ',
+                icon: { show: true, name: 'heroicons_outline:exclamation', color: 'warning' },
+                actions: { confirm: { show: false, label: 'ยืนยัน', color: 'primary' }, cancel: { show: false, label: 'ยกเลิก' } },
+                dismissible: true,
+            });
+            return null;
+        }
+        if (!raw.customer_id) {
+            this._fuseConfirmationService.open({
+                title: 'กรุณาระบุข้อมูล',
+                message: 'กรุณาเลือกลูกค้า หรือเลือกใบแจ้งหนี้เพื่อดึงข้อมูลลูกค้า',
+                icon: { show: true, name: 'heroicons_outline:exclamation', color: 'warning' },
+                actions: { confirm: { show: false, label: 'ยืนยัน', color: 'primary' }, cancel: { show: false, label: 'ยกเลิก' } },
+                dismissible: true,
+            });
+            return null;
+        }
+
+        return {
+            branche_id: raw.branche_id,
+            customer_id: raw.customer_id,
+            date: raw.date,
+            due_date: raw.due_date,
+            total: raw.total ?? 0,
+            remark: raw.remark,
+            condition: raw.condition,
+            billing_invoices: raw.billing_invoices.map((row: { invoice_id: number }) => ({
+                invoice_id: row.invoice_id,
+            })),
+        };
+    }
+
+    private syncCustomerFromInvoice(invoice: { customer_id?: number; customer_name?: string; customer_no?: string }): void {
+        if (!invoice?.customer_id) {
+            return;
+        }
+        const currentId = this.form.get('customer_id')?.value;
+        if (currentId && currentId !== invoice.customer_id) {
+            this._fuseConfirmationService.open({
+                title: 'แจ้งเตือน',
+                message: 'ใบแจ้งหนี้ที่เลือกไม่ใช่ของลูกค้ารายเดียวกับรายการที่มีอยู่',
+                icon: { show: true, name: 'heroicons_outline:exclamation', color: 'warning' },
+                actions: { confirm: { show: false, label: 'ยืนยัน', color: 'primary' }, cancel: { show: false, label: 'ยกเลิก' } },
+                dismissible: true,
+            });
+            return;
+        }
+        this.form.patchValue({ customer_id: invoice.customer_id });
+        const cust = this.customer?.find((c) => c.id === invoice.customer_id);
+        const label = cust
+            ? `${cust.name ?? ''} ${cust.lname ?? ''}`.trim()
+            : (invoice.customer_name ?? '');
+        if (label) {
+            this.customerFilter.setValue(label);
+        }
+    }
+
     Submit(): void {
 
         if (this.Id) {
@@ -267,7 +329,10 @@ export class FormBillingComponent implements OnInit, AfterViewInit, OnDestroy {
                         date: date,
                         due_date: due_date,
                     })
-                    let formValue = this.form.value
+                    const formValue = this.buildBillingPayload();
+                    if (!formValue) {
+                        return;
+                    }
 
                     this._Service.udpateBilling(this.Id, formValue).subscribe({
                         next: (resp: any) => {
@@ -339,7 +404,10 @@ export class FormBillingComponent implements OnInit, AfterViewInit, OnDestroy {
                                     date: date,
                                     due_date: due_date,
                                 })
-                                let formValue = this.form.value
+                    const formValue = this.buildBillingPayload();
+                    if (!formValue) {
+                        return;
+                    }
                     this._Service.createBilling(formValue).subscribe({
                         next: (resp: any) => {
                             this._router.navigate(['document/list/billing']);
@@ -410,6 +478,22 @@ export class FormBillingComponent implements OnInit, AfterViewInit, OnDestroy {
                 });
             } else {
                 if (selected) {
+                    if (
+                        this.form.get('customer_id')?.value &&
+                        selected.customer_id &&
+                        this.form.get('customer_id')?.value !== selected.customer_id
+                    ) {
+                        this._fuseConfirmationService.open({
+                            title: 'แจ้งเตือน',
+                            message: 'ใบแจ้งหนี้นี้ไม่ใช่ของลูกค้ารายเดียวกับรายการที่มีอยู่',
+                            icon: { show: true, name: 'heroicons_outline:exclamation', color: 'warning' },
+                            actions: { confirm: { show: false, label: 'ยืนยัน', color: 'primary' }, cancel: { show: false, label: 'ยกเลิก' } },
+                            dismissible: true,
+                        });
+                        this.itemFilter.setValue(null);
+                        return;
+                    }
+                    this.syncCustomerFromInvoice(selected);
                     let item = this._fb.group({
                         invoice_id: selected.id,
                         invoice_no: selected.no,
@@ -433,23 +517,24 @@ export class FormBillingComponent implements OnInit, AfterViewInit, OnDestroy {
     onOptionCustomer(event: any) {
         const selectedName = event.option.value;
         const selected = this.customer.find(item => item.name === selectedName);
+        if (!selected) {
+            return;
+        }
 
         let formValue = {
             type : '',
             customer_id: selected.id
         }
         this._Service.getCustomerInvoice(formValue).subscribe((resp: any) => {
-            this.itemProduct = resp.data
+            this.itemProduct = resp.data ?? resp ?? [];
             this.filterItem.next(this.itemProduct.slice());
 
         })
-        if (selected) {
-            this.form.patchValue({
-                name: selected.name,
-                customer_id: selected.id
-            })
-            this.customerFilter.setValue(selected.name); // ล้างค่าในช่อง input
-        }
+        this.form.patchValue({
+            name: selected.name,
+            customer_id: selected.id
+        })
+        this.customerFilter.setValue(`${selected.name ?? ''} ${selected.lname ?? ''}`.trim());
     }
 
     private _filter(value: string): string[] {

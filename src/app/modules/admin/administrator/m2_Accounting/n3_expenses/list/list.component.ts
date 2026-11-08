@@ -1,4 +1,3 @@
-import { user } from './../../../../../../mock-api/common/user/data';
 import { LOCALE_ID, Component, OnInit, AfterViewInit, OnDestroy, ViewChild, ViewChildren,
     QueryList, TemplateRef, ChangeDetectorRef, ChangeDetectionStrategy, HostListener } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
@@ -45,8 +44,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
     public pages = { current_page: 1, last_page: 1, per_page: 10, begin: 0 };
     public isEdit: boolean = false;
     public dialogWidth: number = 40; // scale in %
-    user: any;
-
     employeesFilter = new FormControl('');
     filteremployees: ReplaySubject<any[]> = new ReplaySubject<any[]>(1);
     employees: any[] = [];
@@ -74,7 +71,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         private _formDataService: FormDataService,
         private _US: UtilityService,
     ) {
-        this.user = JSON.parse(localStorage.getItem('user'))
         this.expense_types = this._activatedRoute.snapshot.data.expense_types;
         this.employees = this._activatedRoute.snapshot.data.employees.data;
 
@@ -85,7 +81,7 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
             type: [''],
             date: [new Date().toISOString().split('T')[0]],
             detail: [''],
-            branch_id: [this.user.employees.branch_id],
+            branch_id: [this.loginBranchId()],
             expense_type_id: [null, Validators.required],
             status: ['expenses'],
             paid_type: ['', Validators.required],
@@ -116,6 +112,16 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         this._unsubscribeAll.complete();
     }
 
+    private loginBranchId(): string | number | null {
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+        return (user?.employees ?? user?.Employees)?.branch_id ?? null;
+    }
+
+    private loginEmployee(): any {
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+        return user?.employees ?? user?.Employees;
+    }
+
     // DataTable Initialization
     // loadTable(): void { this._US.loadTable(this, this._Service, this._changeDetectorRef, this.pages, this, this.start, this); }
     loadTable(): void {
@@ -129,6 +135,9 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
                 url: 'https://cdn.datatables.net/plug-ins/1.11.3/i18n/th.json',
             },
             ajax: (dataTablesParameters: any, callback) => {
+                const user = JSON.parse(localStorage.getItem('user') || 'null');
+                dataTablesParameters.branch_id =
+                    (user?.employees ?? user?.Employees)?.branch_id ?? null;
                 dataTablesParameters.status = this.formData.value.status;
                 that._Service
                     .getPage(dataTablesParameters)
@@ -209,25 +218,24 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
     //     this._US.openDialog(this._matDialog, this.Dialog, this.dialogWidth, this.formData);
     // }
     openDialog(item?: any, event?: Event): void {
-        console.log('this.user',this.user);
+        const emp = this.loginEmployee();
 
         if (event) { event.stopPropagation(); }
         this.formData.reset();
-        this.employeesFilter.setValue(`${this.user.employees.first_name} ${this.user.employees.last_name}`);
+        this.employeesFilter.setValue(`${emp?.first_name ?? ''} ${emp?.last_name ?? ''}`.trim());
         this.formData.patchValue({
             date: new Date().toISOString().split('T')[0],
-            branch_id: this.user.employees.branch_id,
+            branch_id: emp?.branch_id,
             type: this.currentStatus,
             status: this.currentStatus,
-            employees_id: this.user.employees.id,
+            employees_id: emp?.id ?? '',
         });
 
         if (item) {
             this.formData.patchValue({
                 ...item,
-                branch_id: [this.user.employees.branch_id],
+                branch_id: emp?.branch_id,
             });
-            console.log('item',item);
             if(item.employees) {
                 this.employeesFilter.setValue(`${item.employees.first_name} ${item.employees.last_name}`);
             }else{
@@ -273,7 +281,7 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.formData.patchValue({
                     type: this.currentStatus,
                     status: this.currentStatus,
-                    branch_id:this.user.employees.branch_id
+                    branch_id: this.loginBranchId(),
                 });
             },
             this.closeDialog.bind(this)
@@ -333,12 +341,10 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
           if (this.employeesFilter.invalid) {
             this.employeesFilter.markAsTouched();
           }
-          console.log('No employees Selected');
           return;
         }
 
         const selectedData = event;
-        console.log('selectedData',selectedData);
 
 
         if (selectedData) {
@@ -351,7 +357,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
           if (this.employeesFilter.invalid) {
             this.employeesFilter.markAsTouched();
           }
-          console.log('No employees Found');
           return;
         }
     }

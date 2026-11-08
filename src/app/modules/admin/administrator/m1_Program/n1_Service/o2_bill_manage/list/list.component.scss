@@ -50,6 +50,60 @@ table {
     width: 100%;
 }
 
+.bill-scroll {
+    max-width: 100%;
+}
+
+.wide-data-table {
+    width: max-content;
+    min-width: 100%;
+    border-collapse: collapse;
+
+    thead th {
+        font-weight: 600;
+        vertical-align: middle;
+        color: inherit;
+    }
+
+    .col-name {
+        min-width: 12rem;
+        max-width: 20rem;
+    }
+
+    thead tr.service-subhead th {
+        display: table-cell;
+        text-align: center;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        min-width: 4.25rem;
+        padding: 0.5rem 0.35rem;
+        vertical-align: middle;
+        background-color: transparent;
+        color: inherit;
+        opacity: 1;
+    }
+
+    .svc-cell-first {
+        border-left: 2px solid rgba(0, 0, 0, 0.12);
+    }
+
+    .svc-cell {
+        text-align: center;
+        font-variant-numeric: tabular-nums;
+    }
+}
+
+.bill-scroll ::ng-deep .dataTables_wrapper thead tr.service-subhead th,
+.bill-scroll ::ng-deep table.dataTable thead tr.service-subhead th,
+.bill-scroll ::ng-deep table.dataTable thead tr.service-subhead th.sorting,
+.bill-scroll ::ng-deep table.dataTable thead tr.service-subhead th.sorting_disabled {
+    display: table-cell !important;
+    background-color: transparent !important;
+    color: inherit !important;
+    opacity: 1 !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
 .ui-checkbox {
     --primary-color: #1677ff;
     --secondary-color: #fff;
@@ -296,3 +350,30 @@ $type-width: 80px;
     border-color: #ef4444;
 }
 
+.bill-paid-dialog-header {
+    align-items: center;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    margin: 0 0 0.5rem;
+    padding: 0 0 0.75rem;
+}
+
+.bill-paid-dialog-header__title {
+    color: #111827;
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.75rem;
+}
+
+.bill-paid-dialog-header__close {
+    flex-shrink: 0;
+    margin-right: -0.5rem;
+}
+
+.bill-paid-dialog-header__close-icon {
+    color: #4b5563;
+    font-size: 1.5rem;
+    height: 1.5rem;
+    width: 1.5rem;
+}

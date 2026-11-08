@@ -30,8 +30,15 @@
         <div class="flex items-center pl-2 ml-auto space-x-0.5 sm:space-x-2">
             <messages></messages>
             <!-- <notifications></notifications> -->
-            <div class="font-medium">
-                {{ displayName }}
+            <div
+                class="hidden sm:flex flex-col items-end justify-center min-w-0 max-w-[11rem] md:max-w-[18rem] mr-1 text-right leading-snug"
+                [title]="headerTooltip">
+                <span class="font-medium truncate w-full">{{ displayName }}</span>
+                <span
+                    *ngIf="branchDisplayLabel"
+                    class="mt-0.5 max-w-full truncate rounded-md border border-primary-200 bg-primary-50 px-2 py-0.5 text-xs font-normal text-primary-800 dark:border-primary-700 dark:bg-primary-900/40 dark:text-primary-100">
+                    สาขา {{ branchDisplayLabel }}
+                </span>
             </div>
             <!-- <button class="lg:hidden" mat-icon-button>
                 <mat-icon [svgIcon]="'heroicons_outline:chat-alt-2'"></mat-icon>

@@ -233,7 +233,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
     loadservice() {
         this._Service.getServices().subscribe(resp => {
             const services = resp;
-            console.log('Service Data:', services);
 
             const serviceFormArray = this.formData.get('List_service_tran') as FormArray;
             this._changeDetectorRef.detectChanges();
@@ -246,7 +245,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
             queryParams: { id: id },
             state: { data: item }
         });
-        console.log('check id', id)
     }
 
 
@@ -359,7 +357,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
                 }
                 this._Service.updatstatus(data, item.id).subscribe({
                     next: () => {
-                        console.log(`Status of item ${item.id} updated to ${status}`);
                         this.rerender()
                     },
                     error: (err) => { console.error('Update failed', err); },

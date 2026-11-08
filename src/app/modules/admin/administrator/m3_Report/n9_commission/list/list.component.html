@@ -1,33 +1,22 @@
-<div class="sm:absolute sm:inset-0 flex flex-col flex-auto sm:overflow-hidden bg-card dark:bg-transparent">
-    <!-- Header -->
-    <div class="relative flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between py-8 px-6 md:px-8 border-b">
-        <!-- Loader -->
+<div class="flex flex-col flex-auto sm:absolute sm:inset-0 sm:overflow-hidden bg-card dark:bg-transparent">
+    <div
+        class="relative flex flex-col px-6 py-8 border-b sm:flex-row flex-0 sm:items-center sm:justify-between md:px-8">
         <div class="absolute inset-x-0 bottom-0" *ngIf="isLoading">
             <mat-progress-bar [mode]="'indeterminate'"></mat-progress-bar>
         </div>
-        <!-- Title -->
         <div class="text-4xl font-extrabold tracking-tight">คอมมิชชัน</div>
-        <!-- Actions -->
         <div class="flex items-center mt-6 shrink-0 sm:mt-0 sm:ml-4" [formGroup]="formData">
             <div class="flex space-x-2 reduceHeadPad">
                 <mat-form-field appearance="fill" class="w-50">
                     <mat-select value="default" placeholder="เอกสาร">
-                        <mat-option (click)="pdf()" class="" color="primary">
+                        <mat-option (click)="pdf()" color="primary">
                             <mat-icon svgIcon="pdf-icon"></mat-icon>
-                            <span class="ml-2 mr-1">รายงานคอมมิชชัน</span>
+                            <span class="ml-2 mr-1">รายงาน PDF</span>
                         </mat-option>
-                        <!-- <mat-option (click)="pdfMonth()" class="" color="primary">
-                            <mat-icon svgIcon="pdf-icon"></mat-icon>
-                            <span class="ml-2 mr-1">สรุปรายเดือน</span>
-                        </mat-option>
-                        <mat-option (click)="pdfDay()" class="" color="primary">
+                        <mat-option (click)="excel()" color="primary">
                             <mat-icon svgIcon="excel-icon"></mat-icon>
-                            <span class="ml-2 mr-1">สรุปรายวัน</span>
+                            <span class="ml-2 mr-1">รายงาน Excel</span>
                         </mat-option>
-                        <mat-option (click)="pdfMonth()" class="" color="primary">
-                            <mat-icon svgIcon="excel-icon"></mat-icon>
-                            <span class="ml-2 mr-1">สรุปรายเดือน</span>
-                        </mat-option> -->
                     </mat-select>
                 </mat-form-field>
                 <mat-form-field appearance="fill" class="w-64" [formGroup]="formData">
@@ -35,12 +24,12 @@
                         <input
                             matStartDate
                             placeholder="Start date"
-                            formControlName="startDate"
+                            formControlName="start_date"
                             (dateChange)="onDateChange($event, 'start_date', formData)">
                         <input
                             matEndDate
                             placeholder="End date"
-                            formControlName="endDate"
+                            formControlName="end_date"
                             (dateChange)="onDateChange($event, 'end_date', formData)">
                     </mat-date-range-input>
                     <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
@@ -49,73 +38,62 @@
             </div>
         </div>
     </div>
-    <div class="flex flex-col flex-auto p-5 overflow-x-auto sm:overflow-x-auto sm:overflow-y-auto min-w-full">
-        <table datatable [dtOptions]="dtOptions" class="table row-border hover w-full">
+
+    <div class="commission-scroll flex flex-col flex-auto p-5 sm:overflow-y-auto overflow-x-auto">
+        <table
+            datatable
+            [dtOptions]="dtOptions"
+            [dtTrigger]="dtTrigger"
+            class="table row-border hover whitespace-nowrap wide-data-table">
             <thead>
                 <tr>
-                    <!-- <th width="3%" rowspan="2">#</th> -->
-                    <th  rowspan="2">ชื่อ</th>
-                    <th  rowspan="2">อีเมล</th>
-                    <th  rowspan="2">วันที่จ้าง</th>
-                    <th  rowspan="2">เบอร์โทร</th>
-                    <!-- <th width="" rowspan="2">code</th>
-                    <th width="" rowspan="2">type</th>
-                    <th width="" rowspan="2">สาขา</th> -->
-                    <th class ="text-center" colspan="16">บริการ</th>
+                    <th rowspan="2" class="align-middle">ลำดับ</th>
+                    <th rowspan="2" class="align-middle col-name">ชื่อ</th>
+                    <th rowspan="2" class="align-middle">อีเมล</th>
+                    <th rowspan="2" class="align-middle">วันที่จ้าง</th>
+                    <th rowspan="2" class="align-middle">เบอร์โทร</th>
+                    <th colspan="16" class="text-center align-middle">บริการ</th>
                 </tr>
-                <tr class="bg-gray-700 text-white">
-                    <th class="text-center">ตรวจสภาพรถ</th>
-                    <th class="text-center">พ.ร.บ.</th>
-                    <th class="text-center">ภาษีประจำปี</th>
-                    <th class="text-center">เงินเพิ่มภาษี</th>
-                    <th class="text-center">บริการต่อภาษี</th>
-                    <th class="text-center">ค่าปรับ</th>
-                    <th class="text-center">ประกัน</th>
-                    <th class="text-center">ตรวจสภาพ LPG</th>
-                    <th class="text-center">ตรวจติดตั้ง LPG</th>
-                    <th class="text-center">ตรวจต่ออายุ LPG</th>
-                    <th class="text-center">ตรวจสภาพ NGV</th>
-                    <th class="text-center">ตรวจติดตั้ง NGV</th>
-                    <th class="text-center">หนังสือรับรองวิศวกร</th>
-                    <th class="text-center">ขนส่ง</th>
-                    <th class="text-center">อื่นๆ</th>
-                    <th class="text-center">EMS</th>
+                <tr class="service-subhead">
+                    <th title="ตรวจสภาพรถ">ตรวจสภาพ</th>
+                    <th title="พ.ร.บ.">พ.ร.บ.</th>
+                    <th title="ภาษีประจำปี">ภาษี</th>
+                    <th title="เงินเพิ่มภาษี">เงินเพิ่ม</th>
+                    <th title="บริการต่อภาษี">ต่อภาษี</th>
+                    <th title="ค่าปรับ">ค่าปรับ</th>
+                    <th title="ประกัน">ประกัน</th>
+                    <th title="ตรวจสภาพ LPG">LPG ตรวจ</th>
+                    <th title="ตรวจติดตั้ง LPG">LPG ติด</th>
+                    <th title="ตรวจต่ออายุ LPG">LPG ต่อ</th>
+                    <th title="ตรวจสภาพ NGV">NGV ตรวจ</th>
+                    <th title="ตรวจติดตั้ง NGV">NGV ติด</th>
+                    <th title="หนังสือรับรองวิศวกร">วิศวกร</th>
+                    <th title="ขนส่ง">ขนส่ง</th>
+                    <th title="อื่นๆ">อื่นๆ</th>
+                    <th title="EMS">EMS</th>
                 </tr>
             </thead>
             <tbody *ngIf="dataRow?.length != 0">
                 <tr *ngFor="let item of dataRow; let i = index">
-                    <!-- <td style="width:5%">{{ pages.begin + (i + 1) }}</td> -->
-                    <td>{{ item.first_name}} {{ item.last_name ?? '-'}}</td>
-                    <td class="text-center">{{ item.email ?? '-'}}</td>
-                    <td class="text-center">{{ item.hire_day ?? '-'}}</td>
-                    <td class="text-center">{{ item.phone_number ?? '-'}}</td>
-                    <!-- <td class="">{{ item.code }}</td>
-                    <td class="">{{ item.type }}</td>
-                    <td class="">{{ item.branch_id }}</td> -->
-                    <td class="text-center">{{ item.serviceSummary?.vehicle_Inspection ?? '-'}}</td>
-                    <td class="text-center">{{ item.serviceSummary?.compulsory_Insurance ?? '-'}}</td>
-                    <td class="text-center">{{ item.serviceSummary?.annual_tax ?? '-'}}</td>
-                    <td class="text-center">{{ item.serviceSummary?.tax_fines ?? '-'}}</td>
-                    <td class="text-center">{{ item.serviceSummary?.tax_renewal_service ?? '-'}}</td>
-                    <td class="text-center">{{ item.serviceSummary?.penalty ?? '-'}}</td>
-                    <td class="text-center">{{ item.serviceSummary?.insurance ?? '-'}}</td>
-                    <td class="text-center">{{ item.serviceSummary?.LPG_inspection ?? '-'}}</td>
-                    <td class="text-center">{{ item.serviceSummary?.LPG_installation ?? '-'}}</td>
-                    <td class="text-center">{{ item.serviceSummary?.LPG_renewal ?? '-'}}</td>
-                    <td class="text-center">{{ item.serviceSummary?.NGV_inspection ?? '-'}}</td>
-                    <td class="text-center">{{ item.serviceSummary?.NGV_installation ?? '-'}}</td>
-                    <td class="text-center">{{ item.serviceSummary?.engineer_certificate ?? '-'}}</td>
-                    <td class="text-center">{{ item.serviceSummary?.transportation ?? '-'}}</td>
-                    <td class="text-center">{{ item.serviceSummary?.other ?? '-'}}</td>
-                    <td class="text-center">{{ item.serviceSummary?.EMS ?? '-'}}</td>
+                    <td class="text-center">{{ pages.begin + (i + 1) }}</td>
+                    <td class="col-name">{{ item.first_name }} {{ item.last_name ?? '' }}</td>
+                    <td>{{ item.email ?? '-' }}</td>
+                    <td class="text-center">{{ item.hire_day ?? '-' }}</td>
+                    <td class="text-center">{{ item.phone_number ?? '-' }}</td>
+                    <td
+                        *ngFor="let col of serviceColumns; let first = first"
+                        class="svc-cell"
+                        [class.svc-cell-first]="first"
+                        [class.font-semibold]="serviceCount(item, col.key) > 0">
+                        {{ serviceCount(item, col.key) }}
+                    </td>
                 </tr>
             </tbody>
             <tbody *ngIf="dataRow?.length == 0">
                 <tr>
-                    <td colspan="9" class="no-data-available text-center">ไม่มีข้อมูล !</td>
+                    <td colspan="21" class="no-data-available text-center">ไม่มีข้อมูล !</td>
                 </tr>
             </tbody>
         </table>
     </div>
 </div>
-

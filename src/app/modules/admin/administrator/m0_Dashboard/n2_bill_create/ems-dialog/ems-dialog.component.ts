@@ -285,8 +285,6 @@ export class EmsDialogComponent implements OnInit {
 
         dialogRef.afterClosed().subscribe(result => {
             if (result) {
-                console.log(result, 'address');
-
                 let returnData = {
                     customer: value,
                     address: result
@@ -335,7 +333,6 @@ export class EmsDialogComponent implements OnInit {
     selectSubDistrict(event: any) {
         const selectedName = event.option.value;
         const selected = this.subdistricts.find(item => item.name_th === selectedName);
-        console.log(selected, 'selected');
 
         if (selected) {
             this.form.patchValue({

@@ -153,8 +153,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
             }
 
     Submit(): void {
-        console.log('form', this.formData.value);
-
         if (this.Id) {
             const confirmation = this._fuseConfirm.open({
                 title: "แก้ไขข้อมูล",

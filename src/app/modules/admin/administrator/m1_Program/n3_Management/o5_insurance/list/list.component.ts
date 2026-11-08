@@ -5,7 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { DataTableDirective } from 'angular-datatables';
 import { MatPaginator } from '@angular/material/paginator';
 import { ActivatedRoute, Router } from '@angular/router';
-import { lastValueFrom, map, Observable, of, ReplaySubject, startWith, Subject, switchMap, takeUntil, tap } from 'rxjs';
+import { debounceTime, distinctUntilChanged, lastValueFrom, map, Observable, of, ReplaySubject, startWith, Subject, switchMap, takeUntil, tap } from 'rxjs';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { Service } from '../page.service';
@@ -106,9 +106,10 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         this.formData.get('endDate')?.valueChanges.subscribe(() => { this.rerender(); });
 
         this.insurance_nameFilter.valueChanges
-            .pipe(takeUntil(this._onDestroy))
+            .pipe(debounceTime(400), distinctUntilChanged(), takeUntil(this._onDestroy))
             .subscribe(() => {
                 this._filterInsurance();
+                this.rerender();
             });
     }
 
@@ -141,7 +142,7 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
                 dataTablesParameters.policy_number = status;
                 dataTablesParameters.start_date = this.formData.get('startDate')?.value;
                 dataTablesParameters.end_date = this.formData.get('endDate')?.value;
-                dataTablesParameters.insurance_name = this.insurance_nameFilter.value || '';
+                dataTablesParameters.insurance_name = this.resolveInsuranceNameFilter();
 
                 const order = dataTablesParameters.order.length > 0
                     ? dataTablesParameters.order[0]
@@ -151,7 +152,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
                     this[pagesKey].current_page = resp.current_page;
                     this[pagesKey].last_page = resp.last_page;
                     this[pagesKey].per_page = resp.per_page;
-                    console.log(this.dataRow1);
                     (resp.current_page > 1)
                         ? this[pagesKey].begin = resp.per_page * (resp.current_page - 1)
                         : this[pagesKey].begin = 0;
@@ -219,10 +219,11 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         const formatSDate = this._US.pdfDateFormat(startDate);
         const formatEDate = this._US.pdfDateFormat(endDate);
 
-        const insurance_name = this.insurance_nameFilter.value;
+        const insurance_name = encodeURIComponent(this.resolveInsuranceNameFilter());
+        const policy_number = this.selectedTabIndex === 1 ? 1 : 0;
 
         window.open(
-            `${environment.API_URL}/api/report/exportPDF/InsurancesRenewals_report?start_date=${formatSDate}&end_date=${formatEDate}&insurance_name=${insurance_name}&branch_id=${branch_id}`,
+            `${environment.API_URL}/api/report/exportPDF/InsurancesRenewals_report?start_date=${formatSDate}&end_date=${formatEDate}&insurance_name=${insurance_name}&branch_id=${branch_id}&policy_number=${policy_number}`,
             '_blank'
         );
     }
@@ -239,23 +240,37 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         const formatSDate = this._US.pdfDateFormat(startDate);
         const formatEDate = this._US.pdfDateFormat(endDate);
 
+        const insurance_name = encodeURIComponent(this.resolveInsuranceNameFilter());
+        const policy_number = this.selectedTabIndex === 1 ? 1 : 0;
+
         window.open(
-            `${environment.API_URL}/api/report/excel/InsurancesRenewals_report?start_date=${formatSDate}&end_date=${formatEDate}&branch_id=${branch_id}`,
+            `${environment.API_URL}/api/report/excel/InsurancesRenewals_report?start_date=${formatSDate}&end_date=${formatEDate}&insurance_name=${insurance_name}&branch_id=${branch_id}&policy_number=${policy_number}`,
             '_blank'
         );
+    }
+
+    private resolveInsuranceNameFilter(): string {
+        const raw = this.insurance_nameFilter.value;
+        if (raw == null || raw === '') {
+            return '';
+        }
+        if (typeof raw === 'object' && raw !== null && typeof (raw as { name?: unknown }).name === 'string') {
+            return (raw as { name: string }).name;
+        }
+        return String(raw);
     }
 
     protected _filterInsurance() {
         if (!this.insurance_name) {
             return;
         }
-        let search = this.insurance_nameFilter.value;
+        let search = this.resolveInsuranceNameFilter();
 
         if (!search) {
             this.filterinsurance_name.next(this.insurance_name.slice());
             return;
         } else {
-            search = search.toString().toLowerCase();
+            search = search.toLowerCase();
         }
 
         this.filterinsurance_name.next(
@@ -266,12 +281,11 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     onSelectInsurance(event: any, type: any) {
-        if (!event) {
-            this.insurance_nameFilter.setValue('');
+        if (event == null) {
+            this.insurance_nameFilter.setValue('', { emitEvent: false });
             if (this.insurance_nameFilter.invalid) {
                 this.insurance_nameFilter.markAsTouched();
             }
-            console.log('No Insurance Selected');
             this.rerender();
             return;
         }
@@ -279,13 +293,12 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         const selectedData = event;
 
         if (selectedData) {
-            this.insurance_nameFilter.setValue(`${selectedData.name}`);
+            this.insurance_nameFilter.setValue(`${selectedData.name}`, { emitEvent: false });
             this.rerender();
         } else {
             if (this.insurance_nameFilter.invalid) {
                 this.insurance_nameFilter.markAsTouched();
             }
-            console.log('No Insurance Found');
             return;
         }
     }

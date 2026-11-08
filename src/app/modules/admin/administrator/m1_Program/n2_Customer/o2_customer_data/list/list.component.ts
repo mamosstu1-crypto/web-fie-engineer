@@ -250,8 +250,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
     //     this.dialog = this._US.openDialog(this._matDialog, this.Dialog, 90, this.formData);
     // }
     openDialog(id?: any): void {
-        console.log('id',id);
-
         if(id) {
             this._router.navigate(['customer_data/list/address/' + id])
         }else{

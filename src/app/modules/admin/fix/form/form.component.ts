@@ -177,8 +177,6 @@ export class ListfromComponent implements OnInit, AfterViewInit, OnDestroy {
         if (this.Id) {
             this._Service.getById(this.Id).subscribe((resp: any) => {
                 this.itemData = resp.data;
-                console.log(this.itemData, 'itemData');
-
                 this.form.patchValue({
                     ...this.itemData,
                 });
@@ -192,8 +190,6 @@ export class ListfromComponent implements OnInit, AfterViewInit, OnDestroy {
                     const selected = this.itemProduct.find(
                         (item) => item.id === element.service_id
                     );
-                    console.log(selected);
-
                     let item = this._fb.group({
                         id: element.id,
                         service_id: element.service_id,
@@ -346,8 +342,6 @@ export class ListfromComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     Submit(): void {
-        console.log('form', this.form.value);
-
         if (this.Id) {
             const confirmation = this._fuseConfirmationService.open({
                 title: 'แก้ไขข้อมูล',
@@ -754,7 +748,6 @@ export class ListfromComponent implements OnInit, AfterViewInit, OnDestroy {
 
         dialogRef.afterClosed().subscribe((result) => {
             if (result && value === 'NEW') {
-                console.log(result);
                 const fullAddress = `${result.address?.address} ${result.address?.provinces?.name_th} ${result.address?.districts?.name_th} ${result.address?.sub_districts?.name_th} ${result.address?.sub_districts?.zip_code}`;
                 this.form.patchValue({
                     customer_type: result.customer?.type,
@@ -769,7 +762,6 @@ export class ListfromComponent implements OnInit, AfterViewInit, OnDestroy {
                     customer_is_headquarter: result.customer?.is_headquarter,
                 });
             } else if (result && value === 'LIST') {
-                console.log(result);
                 this.form.patchValue({
                     customer_type: result.customer?.type,
                     customer_id: result.customer?.id,
@@ -782,9 +774,6 @@ export class ListfromComponent implements OnInit, AfterViewInit, OnDestroy {
                     customer_tax_id: result.customer?.tax_id,
                     customer_is_headquarter: result.customer?.is_headquarter,
                 });
-                // console.log(this.form.value);
-            } else {
-                console.log('no data');
             }
         });
     }
@@ -843,7 +832,6 @@ export class ListfromComponent implements OnInit, AfterViewInit, OnDestroy {
                     engine_number: result.engine_number,
                 });
             } else if (result && value === 'LIST') {
-                console.log(result);
                 this.form.patchValue({
                     vehicle_id: result?.id,
                     brand_name: result.vehicle_brands?.name,
@@ -853,9 +841,6 @@ export class ListfromComponent implements OnInit, AfterViewInit, OnDestroy {
                     chassis_number: result.chassis_number,
                     engine_number: result.engine_number,
                 });
-                console.log(this.form.value);
-            } else {
-                console.log('no data');
             }
         });
     }

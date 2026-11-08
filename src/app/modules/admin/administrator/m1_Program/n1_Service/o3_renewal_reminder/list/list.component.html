@@ -1,68 +1,46 @@
-<style>
-
-</style>
-
 <div class="flex flex-col flex-auto sm:absolute sm:inset-0 sm:overflow-hidden bg-card dark:bg-transparent">
-    <!-- Header -->
+    <!-- Header (โครงเดียvกับ o2_car_tax — เอกสาร + ช่วงวันที่ แถvเดียvกับหัวข้อ) -->
     <div
         class="relative flex flex-col px-6 py-8 border-b sm:flex-row flex-0 sm:items-center sm:justify-between md:px-8">
-        <!-- Loader -->
         <div class="absolute inset-x-0 bottom-0" *ngIf="isLoading">
             <mat-progress-bar [mode]="'indeterminate'"></mat-progress-bar>
         </div>
-        <!-- Title -->
-        <div class="text-4xl font-extrabold tracking-tight">ติดตามลูกค้า</div>
-        <!-- Actions -->
-        <div class="flex items-center mt-6 shrink-0 sm:mt-0 sm:ml-4" [formGroup]="formData">
-            <!-- Add product button -->
-            <div class="flex">
-                <div class="flex space-x-2 reduceHeadPad">
-                    <!-- <mat-form-field appearance="fill" class="w-50">
-                        <mat-select value="default" placeholder="เอกสาร">
-                            <mat-option (click)="pdfDay()" class="" color="primary">
-                                <mat-icon svgIcon="pdf-icon"></mat-icon>
-                                <span class="ml-2 mr-1">สรุปรายวัน</span>
-                            </mat-option>
-                            <mat-option (click)="pdfMonth()" class="" color="primary">
-                                <mat-icon svgIcon="pdf-icon"></mat-icon>
-                                <span class="ml-2 mr-1">สรุปรายเดือน</span>
-                            </mat-option>
-                            <mat-option (click)="pdfDay()" class="" color="primary">
-                                <mat-icon svgIcon="excel-icon"></mat-icon>
-                                <span class="ml-2 mr-1">สรุปรายวัน</span>
-                            </mat-option>
-                            <mat-option (click)="pdfMonth()" class="" color="primary">
-                                <mat-icon svgIcon="excel-icon"></mat-icon>
-                                <span class="ml-2 mr-1">สรุปรายเดือน</span>
-                            </mat-option>
-                        </mat-select>
-                    </mat-form-field> -->
-                    <mat-form-field appearance="fill" class="w-64" [formGroup]="formData">
-                        <mat-date-range-input [rangePicker]="picker">
-                            <input
-                                matStartDate
-                                placeholder="Start date"
-                                formControlName="startDate"
-                                (dateChange)="onDateChange($event, 'startDate', formData)">
-                            <input
-                                matEndDate
-                                placeholder="End date"
-                                formControlName="endDate"
-                                (dateChange)="onDateChange($event, 'endDate', formData)">
-                        </mat-date-range-input>
-                        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-                        <mat-date-range-picker #picker></mat-date-range-picker>
-                    </mat-form-field>
-                </div>
-                <!-- <a routerLink="../../d02.bill_manage/new" class="ml-4" mat-flat-button [color]="'primary'">
-                    <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
-                    <span class="ml-2 mr-1">สร้างบิล</span>
-                </a> -->
-            </div>
+        <div class="text-4xl font-extrabold tracking-tight min-w-0 sm:mr-4">ติดตามลูกค้า</div>
+        <div
+            class="renewal-header-actions flex flex-nowrap space-x-2 mt-6 sm:mt-0 flex-shrink-0 reduceHeadPad"
+            [formGroup]="formData">
+            <mat-form-field appearance="fill" class="renewal-doc-field w-50">
+                <mat-select value="default" placeholder="เอกสาร">
+                    <mat-option (click)="pdf()" color="primary">
+                        <mat-icon svgIcon="pdf-icon"></mat-icon>
+                        <span class="ml-2 mr-1">รายงานติดตามลูกค้า</span>
+                    </mat-option>
+                    <mat-option (click)="excel()" color="primary">
+                        <mat-icon svgIcon="excel-icon"></mat-icon>
+                        <span class="ml-2 mr-1">รายงานติดตามลูกค้า</span>
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="fill" class="renewal-date-field w-64">
+                <mat-date-range-input [rangePicker]="picker">
+                    <input
+                        matStartDate
+                        placeholder="Start date"
+                        formControlName="startDate"
+                        (dateChange)="onDateChange($event, 'startDate', formData)">
+                    <input
+                        matEndDate
+                        placeholder="End date"
+                        formControlName="endDate"
+                        (dateChange)="onDateChange($event, 'endDate', formData)">
+                </mat-date-range-input>
+                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-date-range-picker #picker></mat-date-range-picker>
+            </mat-form-field>
         </div>
     </div>
 
-    <div class="flex flex-col flex-auto min-w-full p-5 overflow-x-auto sm:overflow-x-auto sm:overflow-y-auto">
+    <div class="flex flex-col flex-auto min-h-0 min-w-full p-5 overflow-x-auto sm:overflow-y-auto">
 
         <table datatable [dtOptions]="dtOptions1" class="table w-full row-border hover">
             <thead>
@@ -117,8 +95,7 @@
 <ng-template #Dialog>
     <div class="flex flex-col">
         <form [formGroup]="formData">
-            <h2 mat-dialog-title *ngIf="!isEdit">เพิ่มข้อมูลลูกค้า</h2>
-            <h2 mat-dialog-title *ngIf="isEdit">แก้ไขลูกค้า</h2>
+            <app-dialog-header [title]="isEdit ? 'แก้ไขลูกค้า' : 'เพิ่มข้อมูลลูกค้า'" (closeClick)="closeDialog()"></app-dialog-header>
             <mat-dialog-content>
                 <!-- REPLACE CONTENT mt-2-->
                 <div class="flex flex-col w-full mt-2 lg:w-4/4">

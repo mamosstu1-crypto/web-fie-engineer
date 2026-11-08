@@ -69,7 +69,6 @@ export class DialogRunno implements OnInit {
                 this.filterInspection_vats.next(this.Inspection_vats.slice());
             },
             error: (err) => {
-                console.log(err)
             }
         })
     }
@@ -125,7 +124,6 @@ export class DialogRunno implements OnInit {
           if (this.Inspection_vatsFilter.invalid) {
             this.Inspection_vatsFilter.markAsTouched(); // กำหนดสถานะ touched เพื่อแสดง mat-error
           }
-          console.log('No Inspection_vats Selected');
           return;
         }
 
@@ -141,7 +139,6 @@ export class DialogRunno implements OnInit {
           if (this.Inspection_vatsFilter.invalid) {
             this.Inspection_vatsFilter.markAsTouched(); // กำหนดสถานะ touched เพื่อแสดง mat-error
           }
-          console.log('No Inspection_vats Found');
           return;
         }
       }

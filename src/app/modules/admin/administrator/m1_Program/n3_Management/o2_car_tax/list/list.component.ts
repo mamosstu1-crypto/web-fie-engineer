@@ -90,6 +90,7 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
 
     selectedItem2: any = null;
     taxRenewalDateModel: Date | null = null;
+    paytrueDebtHint = '';
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     private start: number;
@@ -390,9 +391,11 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         const user = JSON.parse(localStorage.getItem('user'));
         const branch_id = user?.employees?.branch_id;
         const startDate =
-            this.formData.get('startDate')?.value ?? null;
+            this.formData.get('startDate')?.value ||
+            this._US.pdfDefaultDate('firstDayOfMonth');
         const endDate =
-            this.formData.get('endDate')?.value ?? null;
+            this.formData.get('endDate')?.value ||
+            this._US.pdfDefaultDate('lastDayOfMonth');
         const formatSDate = this._US.pdfDateFormat(startDate);
         const formatEDate = this._US.pdfDateFormat(endDate);
         let tax_vehicle = '';
@@ -404,9 +407,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
             case 4: tax_vehicle = 'success'; break;  // สำเร็จ
             default: tax_vehicle = ''; break;
         }
-        console.log(tax_vehicle);
-
-
         window.open(
             `${environment.API_URL}/api/report/excel/cartaxbystatus?start_date=${formatSDate}&end_date=${formatEDate}&tax_vehicle=${tax_vehicle}&branch_id=${branch_id}`,
             '_blank'
@@ -415,19 +415,50 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
 
     openEditDialog(item: any): void {
         this.selectedItem = { ...item };
+        this.updatePaytrueDebtHint();
         this._matDialog.open(this.editDialog, { width: `${this.dialogWidth}%`, data: { item } });
+    }
+
+    onPayTrueChange(): void {
+        this.updatePaytrueDebtHint();
+    }
+
+    /** แสดงก่อนบันทึก — สอดคล้องคอลัมน์ payextra หน้ารายการหนี้ */
+    private updatePaytrueDebtHint(): void {
+        if (!this.selectedItem?.service_price && this.selectedItem?.service_price !== 0) {
+            this.paytrueDebtHint = '';
+            return;
+        }
+        const billed = parseFloat(String(this.selectedItem.service_price).replace(/,/g, ''));
+        const payRaw = this.selectedItem.paytrue;
+        if (payRaw === null || payRaw === undefined || payRaw === '') {
+            this.paytrueDebtHint = '';
+            return;
+        }
+        const pay = parseFloat(String(payRaw).replace(/,/g, ''));
+        if (Number.isNaN(billed) || Number.isNaN(pay)) {
+            this.paytrueDebtHint = '';
+            return;
+        }
+        if (pay > billed) {
+            this.paytrueDebtHint = `เพิ่ม ${(pay - billed).toLocaleString('th-TH')} บาท — อย่าลืมเก็บเพิ่มจากลูกค้า`;
+            return;
+        }
+        if (pay < billed) {
+            this.paytrueDebtHint = `คืน ${(billed - pay).toLocaleString('th-TH')} บาท — อย่าลืมคืนให้ลูกค้า`;
+            return;
+        }
+        this.paytrueDebtHint = 'ยอดตรงกับรับมา — ไม่มีเพิ่ม/คืน';
     }
 
     // setPayTrueToReceived(): void {
     //     this.selectedItem.paytrue = this.selectedItem.total_service_tax;
-    //     console.log('1',this.selectedItem);
-    //     console.log('2',this.selectedItem.paytrue);
     // }
     setPayTrueToReceived(): void {
         // ลบเครื่องหมายคอมม่าออกจากจำนวนเงินก่อนที่จะเซ็ตค่า
         const paytrueValue = parseFloat(this.selectedItem.service_price.toString().replace(/,/g, ''));
         this.selectedItem.paytrue = paytrueValue;
-        // this.selectedItem.commission = paytrueValue;
+        this.updatePaytrueDebtHint();
     }
 
 

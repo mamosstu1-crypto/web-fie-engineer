@@ -2,15 +2,17 @@
     class="flex flex-col flex-auto w-100* min-w-0 sm:absolute sm:inset-0 sm:overflow-hidden bg-card dark:bg-transparent ">
     <div class="flex flex-row flex-wrap w-full overflow-auto text-black" [formGroup]="formData">
         <div class="flex flex-row w-full px-5 bg-white rounded-md">
-            <div class="flex flex-col w-full py-5 space-y-3 lg:flex-row lg:space-y-0 lg:space-x-3">
+            <div class="flex flex-col w-full py-5 space-y-3 lg:flex-row lg:space-y-0 lg:space-x-3 bill-create-form">
                 <!-- ข้อมูลรถ -->
                 <div class="w-100* lg:w-1/3 p-5 border-2 border-blue-500 rounded-md">
                     <div class="pb-5 text-2xl font-medium tracking-tight text-blue-900 ">ข้อมูลรถ</div>
                     <!-- Form Fields -->
                     <div>
-                        <mat-form-field appearance="fill" class="w-full">
-                            <mat-label>ประเภทรถ</mat-label>
+                        <span class="bill-field-title bill-label">ประเภทรถ<span class="bill-required-star">*</span></span>
+                        <mat-form-field appearance="fill" class="w-full" hideRequiredMarker floatLabel="never"
+                            [class.bill-field-error]="fieldHasError('vehicle_inspection_types_id')">
                             <mat-select [formControlName]="'vehicle_inspection_types_id'"
+                                placeholder="ประเภทรถ"
                                 (selectionChange)="onVehicleTypeChange($event.value)">
                                 <!-- <mat-option value="default">---- ประเภทรถ ----</mat-option> -->
                                 <mat-option *ngFor="let item of listVehicleInspection" [value]="item.id">
@@ -22,9 +24,10 @@
                         </mat-form-field>
                     </div>
                     <div>
-                        <mat-form-field appearance="fill" class="w-full">
-                            <mat-label>ประเภท พ.ร.บ.</mat-label>
-                            <mat-select [formControlName]="'insurance_types_id'">
+                        <span class="bill-field-title bill-label">ประเภท พ.ร.บ.<span class="bill-required-star">*</span></span>
+                        <mat-form-field appearance="fill" class="w-full" hideRequiredMarker floatLabel="never"
+                            [class.bill-field-error]="fieldHasError('insurance_types_id')">
+                            <mat-select [formControlName]="'insurance_types_id'" placeholder="ประเภท พ.ร.บ.">
                                 <!-- <mat-option value="default">---- ประเภท พ.ร.บ. ----</mat-option> -->
                                 <mat-option *ngFor="let item of filteredInsuranceTypes" [value]="item.id">
                                     <ng-container *ngIf="item?.code">[ {{ item.code }} ]</ng-container>
@@ -33,26 +36,30 @@
                             </mat-select>
                         </mat-form-field>
                     </div>
-                    <mat-label>ป้ายทะเบียน</mat-label>
+                    <span class="bill-label bill-field-title">ป้ายทะเบียน<span class="bill-required-star">*</span></span>
                     <div class="flex items-center space-x-2">
-                        <mat-form-field appearance="fill" class="w-1/2">
-                            <input matInput min="0" placeholder="ตัวอักษร" [formControlName]="'licenseLetters'"
-                                [readonly]="!formData.get('licenseNumber').value">
+                        <mat-form-field appearance="fill" class="w-1/2" hideRequiredMarker
+                            [class.bill-field-error]="fieldHasError('licenseLetters')">
+                            <input matInput min="0" placeholder="ตัวอักษร" [formControlName]="'licenseLetters'">
                         </mat-form-field>
                         <span class="pb-4 text-3xl">-</span>
-                        <mat-form-field appearance="fill" class="w-1/2">
+                        <mat-form-field appearance="fill" class="w-1/2" hideRequiredMarker
+                            [class.bill-field-error]="fieldHasError('licenseNumber')">
                             <input matInput min="0" placeholder="เลขทะเบียน" [formControlName]="'licenseNumber'"
                                 [matAutocomplete]="autolicense" (keydown)="noNaN($event)">
-                            <mat-autocomplete #autolicense="matAutocomplete"
-                                (optionSelected)="onVehicleSelected($event.option.value)">
+                            <mat-autocomplete #autolicense="matAutocomplete" autoActiveFirstOption
+                                panelClass="bill-vehicle-autocomplete-panel"
+                                (optionSelected)="onVehicleSelected($event)">
                                 <mat-option *ngFor="let vehicle of filteredVehicles | async"
-                                    [value]="vehicle.license_plate">
+                                    [value]="vehicleLicenseNumberPart(vehicle)">
                                     {{ vehicle.license_plate }}
                                 </mat-option>
                             </mat-autocomplete>
                         </mat-form-field>
                     </div>
-                    <mat-form-field appearance="fill" class="w-full">
+                    <span class="bill-field-title bill-label">จังหวัด<span class="bill-required-star">*</span></span>
+                    <mat-form-field appearance="fill" class="w-full" hideRequiredMarker floatLabel="never"
+                        [class.bill-field-error]="fieldHasError('province_id')">
                         <input matInput min="0" placeholder="จังหวัด" [formControlName]="'province'"
                             [matAutocomplete]="autoProvince2">
                         <mat-autocomplete #autoProvince2="matAutocomplete">
@@ -69,8 +76,9 @@
                             <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                             <mat-datepicker #picker></mat-datepicker>
                         </mat-form-field> -->
-                        <mat-form-field appearance="fill" class="w-full reduceScreen">
-                            <mat-label>วันที่จดทะเบียน</mat-label>
+                        <mat-form-field appearance="fill" class="w-full reduceScreen" hideRequiredMarker
+                            [class.bill-field-error]="fieldHasError('regeister_date')">
+                            <mat-label>วันที่จดทะเบียน<span class="bill-required-star">*</span></mat-label>
                             <input matInput min="0" [matDatepicker]="picker" [formControlName]="'regeister_date'"
                                 (input)="onDateInput($event)"
                                 (dateChange)="onDateChange($event, 'regeister_date', formData)"
@@ -90,28 +98,38 @@
                     <div class="flex flex-row space-x-2">
                         <!-- <mff class="w-full pr-2" [label]="'เครื่องยนต์(CC)'" [fCN]="'cc'" [pHold]="'เครื่องยนต์(CC)'"></mff> -->
                         <!-- <mff class="w-full pl-2" [label]="'น้ำหนักรถเปล่า(Kg.)'" [fCN]="'weight'" [pHold]="'น้ำหนักรถเปล่า(Kg.)'"></mff> -->
-                        <mat-form-field appearance="fill" class="w-full">
-                            <mat-label>เครื่องยนต์ (CC)</mat-label>
-                            <input matInput min="0" type="number" [formControlName]="'cc'" placeholder="เครื่องยนต์ CC"
-                                (keydown)="noNaN($event)">
-                        </mat-form-field>
-                        <mat-form-field appearance="fill" class="w-full">
-                            <mat-label>น้ำหนักรถเปล่า (Kg.)</mat-label>
-                            <input matInput min="0" type="number" [formControlName]="'weight'"
-                                placeholder="น้ำหนักรถ Kg" (keydown)="noNaN($event)">
-                        </mat-form-field>
+                        <div class="w-full">
+                            <span class="bill-field-title bill-label">เครื่องยนต์ (CC)<span
+                                    class="bill-required-star">*</span></span>
+                            <mat-form-field appearance="fill" class="w-full" hideRequiredMarker floatLabel="never"
+                                [class.bill-field-error]="fieldHasError('cc')">
+                                <input matInput min="0" type="number" [formControlName]="'cc'"
+                                    placeholder="เครื่องยนต์ (CC)" (keydown)="noNaN($event)">
+                            </mat-form-field>
+                        </div>
+                        <div class="w-full">
+                            <span class="bill-field-title bill-label">น้ำหนักรถเปล่า (Kg.)<span
+                                    class="bill-required-star">*</span></span>
+                            <mat-form-field appearance="fill" class="w-full" hideRequiredMarker floatLabel="never"
+                                [class.bill-field-error]="fieldHasError('weight')">
+                                <input matInput min="0" type="number" [formControlName]="'weight'"
+                                    placeholder="น้ำหนักรถเปล่า (Kg.)" (keydown)="noNaN($event)">
+                            </mat-form-field>
+                        </div>
                     </div>
                     <div class="flex flex-row space-x-2">
-                        <mat-form-field appearance="fill" class="w-full reduceScreen">
-                            <mat-label>วันครบภาษี</mat-label>
+                        <mat-form-field appearance="fill" class="w-full reduceScreen" hideRequiredMarker
+                            [class.bill-field-error]="fieldHasError('tax_due_date')">
+                            <mat-label>วันครบภาษี<span class="bill-required-star">*</span></mat-label>
                             <input matInput min="0" [matDatepicker]="picker3" [formControlName]="'tax_due_date'"
                                 (input)="onDateInput($event)"
                                 (dateChange)="onDateChange($event, 'tax_due_date', formData)" placeholder="DD/MM/YYYY">
                             <mat-datepicker-toggle matSuffix [for]="picker3"></mat-datepicker-toggle>
                             <mat-datepicker #picker3></mat-datepicker>
                         </mat-form-field>
-                        <mat-form-field appearance="fill" class="w-full reduceScreen">
-                            <mat-label>วันที่ยื่นภาษี</mat-label>
+                        <mat-form-field appearance="fill" class="w-full reduceScreen" hideRequiredMarker
+                            [class.bill-field-error]="fieldHasError('tax_renewal_date')">
+                            <mat-label>วันที่ยื่นภาษี<span class="bill-required-star">*</span></mat-label>
                             <input matInput min="0" [matDatepicker]="picker4" [formControlName]="'tax_renewal_date'"
                                 (input)="onDateInput($event)"
                                 (dateChange)="onDateChange($event, 'tax_renewal_date', formData)"
@@ -130,12 +148,8 @@
                     </mat-form-field>
                     <div class="flex items-center justify-between pb-1">
                         <div class="flex items-center">
-                            <span [ngClass]="{
-                                    'text-red-500': !formData.get('type_document')?.value,
-                                    'text-black': formData.get('type_document')?.value
-                                }">ชนิดเอกสาร* :
-                            </span>
-                            <div class="pl-5">
+                            <span>ชนิดเอกสาร<span class="bill-required-star">*</span> :</span>
+                            <div class="pl-5" [class.bill-field-error-box]="fieldHasError('type_document')">
                                 <mat-radio-group [formControlName]="'type_document'" class="flex">
                                     <mat-radio-button value="real">เล่ม</mat-radio-button>
                                     <mat-radio-button class="pl-5" value="copy">สำเนา</mat-radio-button>
@@ -179,10 +193,28 @@
                         </div>
                     </div>
 
+                    <div *ngIf="hasLinkedCustomer"
+                        class="mb-3 flex items-start gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
+                        <mat-icon class="mt-0.5 shrink-0 text-emerald-600" style="width:20px;height:20px;font-size:20px">
+                            link
+                        </mat-icon>
+                        <div class="min-w-0 flex-1">
+                            <div class="font-medium">เชื่อมลูกค้าในระบบแล้ว</div>
+                            <div class="truncate text-emerald-800">{{ linkedCustomerSummary }}</div>
+                            <div class="mt-0.5 text-xs text-emerald-700">
+                                บันทึกบิลจะอัปเดตข้อมูลนี้ — ไม่สร้างลูกค้าใหม่
+                            </div>
+                        </div>
+                        <button type="button" mat-button class="!min-w-0 shrink-0 text-emerald-800"
+                            (click)="clearLinkedCustomer()">
+                            เปลี่ยนเป็นคนใหม่
+                        </button>
+                    </div>
 
                     <div class="flex items-center w-full">
-                        <mat-label class="w-30* bill-label">ประเภทลูกค้า *</mat-label>
-                        <mat-form-field appearance="fill" class="flex-grow">
+                        <mat-label class="w-30* bill-label">ประเภทลูกค้า<span class="bill-required-star">*</span></mat-label>
+                        <mat-form-field appearance="fill" class="flex-grow" hideRequiredMarker
+                            [class.bill-field-error]="fieldHasError('type')">
                             <mat-select [formControlName]="'type'" placeholder="ประเภท"
                                 (selectionChange)="onCustomerTypeChange($event.value)">
                                 <mat-option *ngFor="let option of customerTypes" [value]="option.value">
@@ -197,60 +229,17 @@
                             <mat-checkbox [formControlName]="'is_headquarter'">เป็นสำนักงานใหญ่</mat-checkbox>
                         </div>
                     </div>
-                    <div class="flex items-end justify-end mb-2">
-                        <div class="border border-gray-300 p-2 rounded-md">
-                            <mat-button-toggle-group (change)="onTitleSelected($event.value)">
-                                <mat-button-toggle *ngFor="let title of filteredTitles" [value]="title">
-                                    {{ title }}
-                                </mat-button-toggle>
-                            </mat-button-toggle-group>
-                        </div>
-                    </div>
                     <div class="flex items-center w-full">
-                        <mat-label class="w-30* bill-label">ชื่อลูกค้า *</mat-label>
-
-                        <mat-form-field appearance="fill" class="flex-grow">
-                            <input type="text" matInput placeholder="ค้นหาลูกค้า" [formControl]="customerCtrl"
-                                [matAutocomplete]="auto" (focus)="openAutoPanelIfHasData()" />
-
-                            <button mat-icon-button matSuffix type="button" tabindex="-1">
-                                <mat-icon>search</mat-icon>
-                            </button>
-
-                            <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayCustomer"
-                                (optionSelected)="onCustomerSelected2($event.option.value)"
-                                panelClass="customer-autocomplete-panel">
-                                <!-- ✅ Loading -->
-                                <mat-option *ngIf="isLoading" class="customer-option" disabled>
-                                    <div class="customer-option__wrap">
-                                        <div class="customer-option__title">กำลังค้นหา...</div>
-                                        <div class="customer-option__meta">โปรดรอสักครู่</div>
-                                    </div>
-                                </mat-option>
-
-                                <!-- ✅ No result -->
-                                <mat-option *ngIf="!isLoading && customers.length === 0 && (customerCtrl.value || '')"
-                                    disabled>
-                                    ไม่พบข้อมูล
-                                </mat-option>
-
-                                <!-- ✅ List -->
-                                <mat-option *ngFor="let c of customers" [value]="c" class="customer-option">
-                                    <span class="customer-option__wrap">
-                                        <span class="customer-option__title">
-                                            {{ c.name }} {{ c.lname }}
-                                        </span>
-
-                                        <span class="customer-option__meta">
-                                            <span class="pill">{{ c.no }}</span>
-                                            <span class="dot">•</span>
-                                            <span>{{ c.phone_number1 || '-' }}</span>
-                                            <ng-container *ngIf="c.tax_id">
-                                                <span class="dot">•</span>
-                                                <span>Tax: {{ c.tax_id }}</span>
-                                            </ng-container>
-                                        </span>
-                                    </span>
+                        <mat-label class="w-30* bill-label">ชื่อลูกค้า<span class="bill-required-star">*</span></mat-label>
+                        <mat-form-field appearance="fill" class="flex-grow" hideRequiredMarker
+                            [class.bill-field-error]="fieldHasError('name')">
+                            <input matInput placeholder="ชื่อลูกค้า" [formControlName]="'name'"
+                                [matAutocomplete]="autoCustomer">
+                            <mat-autocomplete #autoCustomer="matAutocomplete"
+                                (optionSelected)="onCustomerSelected($event.option.value)">
+                                <mat-option *ngFor="let item of filteredCustomers | async" [value]="item">
+                                    <span>{{ item.name }} {{ item.lname ?? '' }}</span>
+                                    <span *ngIf="item.no" class="text-gray-500 text-sm"> · {{ item.no }}</span>
                                 </mat-option>
                             </mat-autocomplete>
                         </mat-form-field>
@@ -276,8 +265,9 @@
                         </mat-form-field>
                     </div>
                     <div class="flex items-center w-full">
-                        <mat-label class="w-30* bill-label">เบอร์ติดต่อ *</mat-label>
-                        <mat-form-field appearance="fill" class="flex-grow">
+                        <mat-label class="w-30* bill-label">เบอร์ติดต่อ<span class="bill-required-star">*</span></mat-label>
+                        <mat-form-field appearance="fill" class="flex-grow" hideRequiredMarker
+                            [class.bill-field-error]="fieldHasError('phone_number1')">
                             <input matInput min="0" placeholder="เบอร์ติดต่อ" [formControlName]="'phone_number1'"
                                 (keydown)="noNaN($event)">
                         </mat-form-field>
@@ -336,7 +326,16 @@
                                         formData.get('total').value | number:'1.2-2' }}</span> <span>บาท</span></div>
                             </div>
                         </div>
-                        <form formArrayName="List_service_tran">
+                        <p class="bill-service-require-note">
+                            <span class="bill-required-star">*</span>
+                            ต้องเลือกค่าใช้จ่าย/บริการอย่างน้อย 1 รายการ
+                            (ติ๊กช่องด้านขวาของแถวที่ต้องการ แล้วระบุราคาถ้าเปิดใช้งาน)
+                        </p>
+                        <p *ngIf="serviceRequireError" class="text-sm text-red-500 mb-2">
+                            กรุณาเลือกบริการอย่างน้อย 1 รายการ
+                        </p>
+                        <form formArrayName="List_service_tran"
+                            [class.bill-service-section-error]="serviceRequireError">
                             <div *ngFor="let service of servicesFormArray.controls; let i = index" [formGroupName]="i">
                                 <div class="flex items-center custom" *ngIf="
                                         !(i === 3 && !isTaxChecked) &&
@@ -411,7 +410,7 @@
 <ng-template #AddressDialog>
     <div class="flex flex-col">
         <form [formGroup]="cusDataAddressDialog ? formAddress_CusData : formData_address">
-            <h2 mat-dialog-title>ที่อยู่ลูกค้า</h2>
+            <app-dialog-header title='ที่อยู่ลูกค้า' (closeClick)="closeDialog(addressDialogRef)"></app-dialog-header>
             <mat-dialog-content class="space-y-3">
                 <mff class="w-100* force1" [label]="'ที่อยู่'" [fCN]="'address'" [pHold]="'ที่อยู่'"></mff>
                 <mfs [class]="'w-100* force1'" [label]="'จังหวัด'" [fCN]="'province'" [KEY]="'name_th'"
@@ -435,7 +434,7 @@
 <ng-template #AddressDialog2>
     <div class="flex flex-col">
         <form [formGroup]="formData_addressems">
-            <h2 mat-dialog-title>ที่อยู่ลูกค้า</h2>
+            <app-dialog-header title='ที่อยู่ลูกค้า' (closeClick)="closeDialog(addressDialog2Ref)"></app-dialog-header>
             <mat-dialog-content class="space-y-3">
                 <mff class="w-100* force1" [label]="'ชื่อ'" [fCN]="'ems_name'" [pHold]="'ชื่อลูกค้าบน ems'"></mff>
                 <mff class="w-100* force1" [label]="'ที่อยู่'" [fCN]="'ems_address'" [pHold]="'ที่อยู่'"></mff>
@@ -460,7 +459,7 @@
 <ng-template #AddressSelectionDialog>
     <div class="flex flex-col">
         <form [formGroup]="formData_CusData">
-            <h2 mat-dialog-title>เลือกที่อยู่</h2>
+            <app-dialog-header title='เลือกที่อยู่' (closeClick)="closeDialog(addressSelectionDialogRef)"></app-dialog-header>
             <mat-dialog-content>
                 <table class="w-full table-auto">
                     <thead>
@@ -501,6 +500,7 @@
 
 <ng-template #paidType>
     <div class="flex flex-col">
+        <app-dialog-header title="จัดการข้อมูลบิล" (closeClick)="onBackdropClick(paidTypeRef)"></app-dialog-header>
         <form [formGroup]="formData">
             <mat-dialog-content>
                 <mat-tab-group [(selectedIndex)]="selectedTabMain">
@@ -1194,7 +1194,7 @@
                             class="text-white">บันทึก</button>
                         </div> -->
                         <div class="flex flex-col">
-                            <h2 mat-dialog-title>เพิ่มข้อมูลตรวจสภาพรถ</h2>
+                            <app-dialog-header title='เพิ่มข้อมูลตรวจสภาพรถ' (closeClick)="changeTab(0)"></app-dialog-header>
                             <mat-dialog-content>
                                 <div class="mb-4">
                                     <mat-label>สถานะ</mat-label>
@@ -1223,7 +1223,7 @@
 <ng-template #TransecInform>
     <div class="flex flex-col">
         <form [formGroup]="formData_PaidData">
-            <h2 mat-dialog-title>แก้ไขข้อมูล</h2>
+            <app-dialog-header title='แก้ไขข้อมูล' (closeClick)="onBackdropClick(transecInformRef)"></app-dialog-header>
             <mat-dialog-content>
                 <!-- REPLACE CONTENT mt-2-->
                 <div class="flex flex-col w-full mt-2 lg:w-4/4">
@@ -1251,7 +1251,7 @@
 <ng-template #ActPeriod>
     <div class="flex flex-col">
         <form [formGroup]="formData_ActPeriod">
-            <h2 mat-dialog-title>ระยะคุ้มครอง พ.ร.บ.</h2>
+            <app-dialog-header title='ระยะคุ้มครอง พ.ร.บ.' (closeClick)="closeDialog(actPeriodRef, 'forceClose')"></app-dialog-header>
             <mat-dialog-content class="overflow-hidden">
                 <div class="flex flex-row w-100* space-x-4 mb-7">
                     <div class="w-50* flex flex-col space-y-1">
@@ -1383,7 +1383,7 @@
 <ng-template #LackOfTax>
     <div class="flex flex-col">
         <form [formGroup]="formData_address">
-            <h2 mat-dialog-title>กรณีขาดต่อภาษี</h2>
+            <app-dialog-header title='กรณีขาดต่อภาษี' (closeClick)="closeDialog(lackOfTaxRef, 'forceClose')"></app-dialog-header>
             <mat-dialog-content>
                 <a>ขาดปี</a>
                 <section class="flex flex-row">
@@ -1464,7 +1464,7 @@
 <ng-template #InsurData>
     <div class="flex flex-col">
         <form [formGroup]="formData_InsurData">
-            <h2 mat-dialog-title>ระยะคุ้มครอง ประกัน</h2>
+            <app-dialog-header title='ระยะคุ้มครอง ประกัน' (closeClick)="closeDialog(insurDataRef, 'forceClose')"></app-dialog-header>
             <mat-dialog-content class="overflow-hidden">
                 <div class="flex flex-row w-100* space-x-4 mb-7">
                     <div class="w-50* flex flex-col space-y-1">
@@ -1530,7 +1530,7 @@
 <ng-template #DocImage>
     <div class="flex flex-col">
         <form [formGroup]="formData_address">
-            <h2 mat-dialog-title>กรณีขาดต่อภาษี</h2>
+            <app-dialog-header title='กรณีขาดต่อภาษี' (closeClick)="closeDialog(DocImage)"></app-dialog-header>
             <mat-dialog-content>
                 <ngx-dropzone (change)="onSelect($event)"
                     class="flex aspect-[1/1] h-[300px] overflow-hidden object-contain changeOnHover justify-center">
@@ -1560,7 +1560,7 @@
 <ng-template #HullDialog>
     <div class="flex flex-col">
         <form [formGroup]="formGas_Edit">
-            <h2 mat-dialog-title>แก้ไขข้อมูลถัง</h2>
+            <app-dialog-header title='แก้ไขข้อมูลถัง' (closeClick)="closeDialog(cusCarGasRef)"></app-dialog-header>
             <mat-dialog-content>
                 <div class="flex flex-row w-full mt-8 space-x-2">
                     <div class="w-60* flex flex-row space-x-2">
@@ -1613,7 +1613,7 @@
 <ng-template #AddGasDialog>
     <div class="flex flex-col">
         <form [formGroup]="formGas_Add">
-            <h2 mat-dialog-title>เพิ่มข้อมูลถัง</h2>
+            <app-dialog-header title='เพิ่มข้อมูลถัง' (closeClick)="closeDialog(addGasDialogRef)"></app-dialog-header>
             <mat-dialog-content>
                 <div formArrayName="gas">
                     <div class="flex flex-row" *ngFor="let group of gas.controls; let i = index" [formGroupName]="i">
@@ -1720,7 +1720,7 @@
 <ng-template #WithholdingTax>
     <div class="flex flex-col">
         <form [formGroup]="formData_WithholdingTax">
-            <h2 mat-dialog-title>ภาษีหัก ณ ที่จ่าย</h2>
+            <app-dialog-header title='ภาษีหัก ณ ที่จ่าย' (closeClick)="closeDialog(WithholdingTaxRef)"></app-dialog-header>
             <mat-dialog-content class="space-y-3">
                 <div class="flex items-center custom" [ngClass]="'slide-in'">
                     <mat-label class="w-46* bill-label">พรบ. %</mat-label>
@@ -1782,7 +1782,7 @@
 <ng-template #AddressDialogcustomer>
     <div class="flex flex-col">
         <form [formGroup]="formData_addresscustomer">
-            <h2 mat-dialog-title>ที่อยู่ลูกค้า</h2>
+            <app-dialog-header title='ที่อยู่ลูกค้า' (closeClick)="closeDialog(AddressDialogcustomerRef)"></app-dialog-header>
             <mat-dialog-content class="space-y-3">
                 <mff class="w-100* force1" [label]="'ที่อยู่'" [fCN]="'address'" [pHold]="'ที่อยู่'"></mff>
                 <mfs [class]="'w-100* force1'" [label]="'จังหวัด'" [fCN]="'province'" [KEY]="'name_th'"

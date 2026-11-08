@@ -46,7 +46,6 @@ export class UserComponent implements OnInit, OnDestroy
     {
         // Subscribe to user changes
         // this.user = JSON.parse(localStorage.getItem('user')) || null;
-        console.log(this.user);
         // this._userService.user$
         //     .pipe(takeUntil(this._unsubscribeAll))
         //     .subscribe((user: User) => {

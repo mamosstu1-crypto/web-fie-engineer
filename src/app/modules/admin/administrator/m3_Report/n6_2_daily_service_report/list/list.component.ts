@@ -134,20 +134,14 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         // formValue.branch_id= this.user?.employees?.branch_id;
 
         this._Service.getDailyReport_new(formValue).subscribe((resp: any) => {
-            console.log('resp',resp);
             this.dataRow = resp.data
-            console.log('this.dataRow',this.dataRow);
-
             this._changeDetectorRef.markForCheck()
         })
     }
 
     dateChange() {
         let dateStart = DateTime.fromJSDate(this.form.value.date_start).toFormat('yyyy-MM-dd');
-        console.log(dateStart);
         let dateEnd = DateTime.fromJSDate(this.form.value.date_end).toFormat('yyyy-MM-dd');
-        console.log(dateEnd);
-
     }
 
     clearData() {
@@ -159,7 +153,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
             if (this.itemFilter.invalid) {
                 this.itemFilter.markAsTouched(); // กำหนดสถานะ touched เพื่อแสดง mat-error
             }
-            console.log('No Employee Selected');
             return;
         }
         const selectedData = event; // event จะเป็นออบเจ็กต์ item
@@ -172,13 +165,10 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
             this.form.patchValue({
                 customer_id: selectedData.id
             })
-            console.log(this.form.value);
-
         } else {
             if (this.itemFilter.invalid) {
                 this.itemFilter.markAsTouched(); // กำหนดสถานะ touched เพื่อแสดง mat-error
             }
-            console.log('No Employee Found');
             return;
         }
     }

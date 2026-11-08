@@ -66,8 +66,6 @@ export class DialogPayment implements OnInit {
     }
 
     ngOnInit(): void {
-        console.log('data', this.data);
-
         let paid_price = this.data.total_amount
         if (this.data.work_order_payment?.length > 0) {
             paid_price = this.data.work_order_payment[this.data.work_order_payment.length - 1].after_price

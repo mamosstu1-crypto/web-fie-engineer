@@ -249,6 +249,111 @@ table {
 .bill-label {
     margin-top: -12px !important;
     margin-right: 1rem !important;
+    color: rgba(0, 0, 0, 0.87);
+}
+
+.bill-field-title {
+    display: block;
+    margin-bottom: 0.25rem;
+    margin-top: 0 !important;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.87);
+}
+
+.bill-required-star {
+    color: #ef4444 !important;
+    margin-left: 0.25em;
+    font-weight: 600;
+}
+
+:host ::ng-deep .bill-vehicle-autocomplete-panel {
+    z-index: 1200 !important;
+    max-height: 280px;
+}
+
+/* ใช้ * แดงของเราเท่านั้น — ไม่ให้ Material ใส่ * ซ้ำ */
+:host ::ng-deep .bill-create-form {
+    .mat-form-field-required-marker {
+        display: none !important;
+    }
+
+    mat-form-field.mat-form-field-invalid .mat-form-field-label,
+    mat-form-field.mat-form-field-invalid .mat-form-field-label mat-label {
+        color: rgba(0, 0, 0, 0.6) !important;
+    }
+
+    /* placeholder / ค่าว่างใน select ไม่ให้จางแบบ text-hint ของ theme */
+    input.mat-input-element::placeholder {
+        color: rgba(0, 0, 0, 0.55) !important;
+        opacity: 1 !important;
+    }
+
+    .mat-select-placeholder {
+        color: rgba(0, 0, 0, 0.55) !important;
+    }
+
+    .mat-select-value-text {
+        color: rgba(0, 0, 0, 0.87) !important;
+    }
+}
+
+:host ::ng-deep mat-form-field.bill-field-error.mat-form-field-appearance-fill {
+    .mat-form-field-wrapper .mat-form-field-flex {
+        border-color: var(--fuse-warn) !important;
+    }
+
+    .mat-form-field-label,
+    .mat-form-field-label-wrapper,
+    .mat-form-field-label mat-label {
+        color: rgba(0, 0, 0, 0.6) !important;
+    }
+}
+
+.bill-field-error-box {
+    border: 2px solid var(--fuse-warn, #ef4444);
+    border-radius: 0.375rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.bill-paid-dialog-header {
+    align-items: center;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    margin: 0 0 0.5rem;
+    padding: 0 0 0.75rem;
+}
+
+.bill-paid-dialog-header__title {
+    color: #111827;
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.75rem;
+}
+
+.bill-paid-dialog-header__close {
+    flex-shrink: 0;
+    margin-right: -0.5rem;
+}
+
+.bill-paid-dialog-header__close-icon {
+    color: #4b5563;
+    font-size: 1.5rem;
+    height: 1.5rem;
+    width: 1.5rem;
+}
+
+.bill-service-require-note {
+    color: #4b5563;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.bill-service-section-error {
+    outline: 2px solid var(--fuse-warn, #ef4444);
+    outline-offset: 4px;
+    border-radius: 0.375rem;
 }
 
 :host ::ng-deep .force1 {

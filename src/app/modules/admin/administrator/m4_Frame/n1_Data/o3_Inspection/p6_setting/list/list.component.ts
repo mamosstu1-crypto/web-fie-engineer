@@ -116,7 +116,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
     openDialog(id?: any): void {
         this.formData.reset();
         this.Id = id || null;
-        console.log('id', id);
 
         if (id) {
             this._Service.getsettingById(id).subscribe((resp:any) => {
@@ -130,8 +129,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
                         type: data.type ?? '',
                         price: data.price ?? '',
                     });
-                    console.log('data', data);
-
                 }
             });
         } else {

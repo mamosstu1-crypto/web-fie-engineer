@@ -349,7 +349,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         if (event) { event.stopPropagation(); }
         if (item) {
             this.formData.patchValue(item);
-            console.log('asdasd',item);
             this.customerFilter.setValue(item?.customers?.name + ' ' + (item?.customers?.lname ?? ''));
             this.isEdit = true;
             this.dialogCache = item;

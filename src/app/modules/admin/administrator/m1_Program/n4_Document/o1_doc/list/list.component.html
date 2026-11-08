@@ -108,8 +108,9 @@
 <ng-template #Dialog>
     <div class="flex flex-col">
         <form [formGroup]="formData">
-            <h2 mat-dialog-title *ngIf="!isEdit">เพิ่มเอกสาร {{form.get('name').value}}</h2>
-            <h2 mat-dialog-title *ngIf="isEdit">แก้ไขเอกสาร {{form.get('name').value}}</h2>
+            <app-dialog-header
+                [title]="(isEdit ? 'แก้ไขเอกสาร ' : 'เพิ่มเอกสาร ') + (form.get('name')?.value || '')"
+                (closeClick)="closeDialog()"></app-dialog-header>
             <mat-dialog-content>
                 <!-- REPLACE CONTENT mt-2-->
                 <div class="flex flex-col w-full mt-2 space-y-2 lg:w-4/4">

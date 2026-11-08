@@ -6,7 +6,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
-import { Observable, Subject, of } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { Service } from '../page.service';
@@ -42,12 +42,10 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
     public isEdit: boolean = false;
     public dialogWidth: number = 40;
 
-    // Cascade dropdown data
     public listProvinces: any[] = [];
     public listDistricts: any[] = [];
     public selectedProvinceId: string = '';
 
-    // Filter state
     public filterParams: any = {};
     public filterProvinceId: string = '';
     public filterDistrictId: string = '';
@@ -120,7 +118,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
     update(): void { this._US.updateItem(this.formData, this._Service, this._fuseConfirm, this.submitForm.bind(this), this.updateResp); }
     delete(id: any): void { this._US.deleteItem(id, this._Service, this._fuseConfirm, this.rerender.bind(this), this.deleteResp); }
 
-    /** เมื่อเลือกจังหวัดในฟอร์ม: โหลดอำเภอในจังหวัดนั้น */
     onProvinceChange(provinceId: string): void {
         this.selectedProvinceId = provinceId;
         this.listDistricts = [];
@@ -147,15 +144,15 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
             });
             this.isEdit = true;
 
-            // โหลดข้อมูลอำเภอโดยอิงจาก province_id ของอำเภอนั้น
             const provinceId = item.districts?.province_id
                 ?? item.district?.province_id
                 ?? item.province_id
                 ?? null;
             if (provinceId) {
-                this.selectedProvinceId = String(provinceId);
-                this._Service.getDistricts(this.selectedProvinceId).subscribe((resp: any) => {
+                this.selectedProvinceId = provinceId;
+                this._Service.getDistricts(provinceId).subscribe((resp: any) => {
                     this.listDistricts = resp?.districts || [];
+                    this.formData.patchValue({ district_id: item.district_id });
                 });
             }
         } else {

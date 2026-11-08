@@ -102,10 +102,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         this.department = this.activated.snapshot.data.department;
         this.sub_department = this.activated.snapshot.data.sub_department;
         this.role = this.activated.snapshot.data.role;
-
-        console.log('department', this.department);
-        console.log('sub_department', this.sub_department);
-        console.log('role', this.role);
     }
 
     // Lifecycle Hooks

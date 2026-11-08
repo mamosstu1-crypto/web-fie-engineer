@@ -148,8 +148,6 @@ export class EditDialogComponent implements OnInit {
         });
 
         this._service.getCustomer().subscribe((resp: any) => {
-            console.log(resp);
-
             this.customer = resp.data
             this.filterCustomer.next(this.customer.slice());
 
@@ -556,8 +554,6 @@ export class EditDialogComponent implements OnInit {
                 this.provinceFilter.setValue(provinceName);
                 this.districtFilter.setValue(districtName);
                 this.subdistrictFilter.setValue(subdistrictName);
-                console.log(this.form.value);
-                
             })
 
 
@@ -600,7 +596,6 @@ export class EditDialogComponent implements OnInit {
     selectSubDistrict(event: any) {
         const selectedName = event.option.value;
         const selected = this.subdistricts.find(item => item.name_th === selectedName);
-        console.log(selected, 'selected');
 
         if (selected) {
             this.form.patchValue({
@@ -633,7 +628,5 @@ export class EditDialogComponent implements OnInit {
         this.provinceFilter.setValue('')
         this.districtFilter.setValue('')
         this.subdistrictFilter.setValue('')
-        console.log(this.form.value);
-
     }
 }

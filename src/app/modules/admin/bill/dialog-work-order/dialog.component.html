@@ -1,14 +1,14 @@
 <div class="w-full p-8">
     <div>
-        <div mat-dialog-title class="text-2xl font-semibold">สร้างใบกำกับภาษีจากงานซ่อม</div>
+        <app-dialog-header title="สร้างใบกำกับภาษีจากงานซ่อม" (closeClick)="onClose()"></app-dialog-header>
     </div>
     <div mat-dialog-content class="overflow-y-auto md:max-h-180">
         <form [formGroup]="form">
             <div class="flex-auto">
                 <div class="flex flex-col md:flex mb-1">
                     <div class="md:w-full">
-                        <mat-form-field [ngClass]="formFieldHelpers" class="w-full md:w-4/4">
-                            <mat-label>เลือกงานซ่อม</mat-label>
+                        <mat-form-field [ngClass]="formFieldHelpers" class="w-full md:w-4/4" hideRequiredMarker>
+                            <mat-label>เลือกงานซ่อม<span class="bill-required-star">*</span></mat-label>
                             <input matInput [formControl]="Inspection_vatsFilter"
                                 [matAutocomplete]="approverAutoComplete" placeholder="เลขงาน" />
                             <mat-autocomplete #approverAutoComplete="matAutocomplete"
@@ -20,8 +20,8 @@
                         </mat-form-field>
                     </div>
                     <div class="w-full">
-                        <mat-form-field class="w-full" [ngClass]="formFieldHelpers">
-                            <mat-label>วันที่จ่าย</mat-label>
+                        <mat-form-field class="w-full" [ngClass]="formFieldHelpers" hideRequiredMarker>
+                            <mat-label>วันที่จ่าย<span class="bill-required-star">*</span></mat-label>
                             <input matInput [matDatepicker]="picker" [formControlName]="'paid_date'"
                                 placeholder="เลือกวันที่จ่าย" />
                             <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
@@ -29,8 +29,8 @@
                         </mat-form-field>
                     </div>
                     <div class="w-full">
-                        <mat-form-field class="w-full" [ngClass]="formFieldHelpers">
-                            <mat-label>เงื่อนไขการชำระเงิน</mat-label>
+                        <mat-form-field class="w-full" [ngClass]="formFieldHelpers" hideRequiredMarker>
+                            <mat-label>เงื่อนไขการชำระเงิน<span class="bill-required-star">*</span></mat-label>
                             <mat-select [formControlName]="'paid_type'" placeholder="เลือกช่องทางการชำระเงิน">
                                 <mat-option *ngFor="let item of payment" [value]="item.value">
                                     {{item.name}}

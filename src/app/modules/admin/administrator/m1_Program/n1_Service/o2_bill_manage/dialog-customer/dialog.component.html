@@ -54,8 +54,8 @@
             <div class="mb-6 -mx-3 md:flex">
                 <div class="px-3 md:w-full">
                     <div class="flex flex-row gap-2">
-                        <mat-form-field [ngClass]="formFieldHelpers" class="w-full">
-                            <mat-label>ชื่อ</mat-label>
+                        <mat-form-field [ngClass]="formFieldHelpers" class="w-full" hideRequiredMarker>
+                            <mat-label>ชื่อ<span class="bill-required-star">*</span></mat-label>
                             <input matInput [placeholder]="'กรอกชื่อหรือชื่อบริษัท'" formControlName="name">
                         </mat-form-field>
                         <mat-form-field [ngClass]="formFieldHelpers" class="w-full" *ngIf="form.get('type').value !== 'vendor'">
@@ -79,8 +79,8 @@
             </div>
             <div class="md:flex mb-6">
                 <div class="flex flex-row gap-2 w-full">
-                    <mat-form-field [ngClass]="formFieldHelpers" class="w-full">
-                        <mat-label>เบอร์ติดต่อหลัก </mat-label>
+                    <mat-form-field [ngClass]="formFieldHelpers" class="w-full" hideRequiredMarker>
+                        <mat-label>เบอร์ติดต่อหลัก<span class="bill-required-star">*</span></mat-label>
                         <input matInput [placeholder]="'กรุณากรอกเบอร์ติดต่อหลัก'" formControlName="phone_number1">
                     </mat-form-field>
                     <mat-form-field [ngClass]="formFieldHelpers" class="w-full">
@@ -91,16 +91,16 @@
             </div>
             <div class="-mx-3 md:flex mb-6">
                 <div class="md:w-full px-3">
-                    <mat-form-field [ngClass]="formFieldHelpers" class="w-full">
-                        <mat-label>ที่อยู่ </mat-label>
+                    <mat-form-field [ngClass]="formFieldHelpers" class="w-full" hideRequiredMarker>
+                        <mat-label>ที่อยู่<span class="bill-required-star">*</span></mat-label>
                         <input matInput [placeholder]="'กรอกข้อมูลที่อยู่'" formControlName="address">
                     </mat-form-field>
                 </div>
             </div>
             <div class="-mx-3 md:flex mb-6">
                 <div class="md:w-full px-3 flex flex-row gap-2">
-                    <mat-form-field class="w-1/2" [ngClass]="formFieldHelpers">
-                        <mat-label>จังหวัด</mat-label>
+                    <mat-form-field class="w-1/2" [ngClass]="formFieldHelpers" hideRequiredMarker>
+                        <mat-label>จังหวัด<span class="bill-required-star">*</span></mat-label>
                         <input matInput [formControl]="provinceFilter" [matAutocomplete]="province"
                             placeholder="ค้นหาจังหวัด" />
                         <mat-autocomplete #province="matAutocomplete" (optionSelected)="selectProvince($event)">
@@ -109,8 +109,8 @@
                             </mat-option>
                         </mat-autocomplete>
                     </mat-form-field>
-                    <mat-form-field class="w-1/2" [ngClass]="formFieldHelpers">
-                        <mat-label>อำเภอ</mat-label>
+                    <mat-form-field class="w-1/2" [ngClass]="formFieldHelpers" hideRequiredMarker>
+                        <mat-label>อำเภอ<span class="bill-required-star">*</span></mat-label>
                         <input matInput [formControl]="districtFilter" [matAutocomplete]="district"
                             placeholder="ค้นหาอำเภอ" />
                         <mat-autocomplete #district="matAutocomplete" (optionSelected)="selectDistrict($event)">
@@ -123,8 +123,8 @@
             </div>
             <div class="-mx-3 md:flex mb-6">
                 <div class="md:w-full px-3 flex flex-row gap-2">
-                    <mat-form-field class="w-1/2" [ngClass]="formFieldHelpers">
-                        <mat-label>ตำบล</mat-label>
+                    <mat-form-field class="w-1/2" [ngClass]="formFieldHelpers" hideRequiredMarker>
+                        <mat-label>ตำบล<span class="bill-required-star">*</span></mat-label>
                         <input matInput [formControl]="subdistrictFilter" [matAutocomplete]="subdistrict"
                             placeholder="ค้นหาตำบล" />
                         <mat-autocomplete #subdistrict="matAutocomplete" (optionSelected)="selectSubDistrict($event)">
@@ -133,8 +133,8 @@
                             </mat-option>
                         </mat-autocomplete>
                     </mat-form-field>
-                    <mat-form-field [ngClass]="formFieldHelpers" class="w-1/2">
-                        <mat-label>รหัสไปรษณีย์ </mat-label>
+                    <mat-form-field [ngClass]="formFieldHelpers" class="w-1/2" hideRequiredMarker>
+                        <mat-label>รหัสไปรษณีย์<span class="bill-required-star">*</span></mat-label>
                         <input matInput [placeholder]="'รหัสไปรษณีย์'" formControlName="zip_code">
                     </mat-form-field>
                 </div>

@@ -26,7 +26,6 @@ export class AddressDialogInCustomerComponent implements OnInit, OnDestroy {
             const fullAddress = `${element.address ?? ''} ${element.provinces?.name_th ?? ''} ${element.districts?.name_th ?? ''} ${element.sub_districts?.name_th ?? ''} ${element.sub_districts?.zip_code ?? ''}`;
             this.address.push(fullAddress)
         });
-        console.log(this.address, 'address');
 
 
     }

@@ -1,3 +1,15 @@
 /* You can add global styles to this file, and also import other style files */
 
 html, body { height: auto !important; }
+
+/* ดอกจันทร์บังคับกรอก — ใช้ร่วมกับหน้าสร้างบิล (bill-required-star) */
+.bill-required-star {
+    color: #ef4444 !important;
+    margin-left: 0.25em;
+    font-weight: 600;
+}
+
+/* ฟอร์มที่ใช้ bill-required-star เอง — ซ่อน * ดำของ Material */
+.fie-required-form .mat-form-field-required-marker {
+    display: none !important;
+}

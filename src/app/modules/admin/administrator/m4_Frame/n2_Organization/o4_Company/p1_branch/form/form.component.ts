@@ -121,7 +121,6 @@ export class FormComponent implements OnInit, AfterViewInit, OnDestroy {
 
         if (this.itemId) {
             this._Service.getByid(this.itemId).subscribe((resp: any) => {
-                console.log(resp);
                 this.imagepic = resp.data.image;
                 this.imagedatas = resp.data.product_images
                 this.formData.patchValue({
@@ -132,7 +131,6 @@ export class FormComponent implements OnInit, AfterViewInit, OnDestroy {
                 })
                 this.url = resp.data.logo_url
                 this.url_under = resp.data.logo_under_url
-                console.log(this.formData.value);
             })
 
 
@@ -307,6 +305,34 @@ export class FormComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
 
+    private buildBranchFormData(): FormData {
+        const formData = new FormData();
+        const skipKeys = new Set(['logo', 'logo_under', 'logo_url', 'logo_under_url']);
+
+        Object.entries(this.formData.value).forEach(([key, value]: [string, unknown]) => {
+            if (skipKeys.has(key) || value === null || value === undefined) {
+                return;
+            }
+            formData.append(key, value as string | Blob);
+        });
+
+        const logoControl = this.formData.get('logo')?.value;
+        if (logoControl instanceof File) {
+            formData.append('logo', logoControl);
+        } else if (this.files.length > 0) {
+            formData.append('logo', this.files[0]);
+        }
+
+        const logoUnderControl = this.formData.get('logo_under')?.value;
+        if (logoUnderControl instanceof File) {
+            formData.append('logo_under', logoUnderControl);
+        } else if (this.files1.length > 0) {
+            formData.append('logo_under', this.files1[0]);
+        }
+
+        return formData;
+    }
+
     update(): void {
         const datePipe = new DatePipe("en-US");
         const expiration_date = datePipe.transform(
@@ -329,7 +355,6 @@ export class FormComponent implements OnInit, AfterViewInit, OnDestroy {
             this.formData.value.expired_ry_ngv,
             "yyyy-MM-dd"
         );
-        console.log(expired_ks_lpg);
         this.formData.patchValue({
             expiration_date: expiration_date,
             expired_ks_lpg: expired_ks_lpg,
@@ -338,18 +363,20 @@ export class FormComponent implements OnInit, AfterViewInit, OnDestroy {
             expired_ry_ngv: expired_ry_ngv,
         });
 
-        let formValue = this.formData.value;
-
-        const formData = new FormData();
-        Object.entries(formValue).forEach(
-            ([key, value]: any[]) => {
-                formData.append(key, value);
-            }
-        );
+        const formData = this.buildBranchFormData();
         this._US.confirmAction('แก้ไขรายการ', 'คุณต้องการแก้ไขรายการใช่หรือไม่', this._fuseConfirmationService,
             () => {
                 this._Service.update(formData, this.formData.get('id').value).subscribe({
                     next: (resp: any) => {
+                        const row = resp?.data;
+                        if (row?.logo_url) {
+                            this.url = row.logo_url;
+                        }
+                        if (row?.logo_under_url) {
+                            this.url_under = row.logo_under_url;
+                        }
+                        this.files = [];
+                        this.files1 = [];
                         this._router
                             .navigateByUrl('branch/list-branch')
                             .then(() => { });
@@ -398,15 +425,7 @@ export class FormComponent implements OnInit, AfterViewInit, OnDestroy {
             expired_ry_ngv: expired_ry_ngv,
         });
 
-        let formValue = this.formData.value;
-        console.log(formValue);
-
-        const formData = new FormData();
-        Object.entries(this.formData.value).forEach(
-            ([key, value]: any[]) => {
-                formData.append(key, value);
-            }
-        );
+        const formData = this.buildBranchFormData();
         this._US.confirmAction('สร้างรายการใหม่', 'คุณต้องการสร้างรายการใหม่ใช่หรือไม่', this._fuseConfirmationService,
             () => {
                 this._Service.create(formData).subscribe({

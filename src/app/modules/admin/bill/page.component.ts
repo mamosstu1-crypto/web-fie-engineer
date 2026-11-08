@@ -81,9 +81,9 @@ export class DocumentComponent implements OnInit, AfterViewInit {
         this.form = this._fb.group({
             status: null,
             customer_id: null,
+            startDate: [''],
+            endDate: [''],
         })
-        console.log(this.type, 'type');
-
     }
     ngOnInit(): void {
 
@@ -95,6 +95,10 @@ export class DocumentComponent implements OnInit, AfterViewInit {
             this.form.patchValue({
                 status: 'unpaid'
             })
+        }
+        if (this.type === 'taxinvoice') {
+            this.form.get('startDate')?.valueChanges.subscribe(() => this.rerender());
+            this.form.get('endDate')?.valueChanges.subscribe(() => this.rerender());
         }
         this.loadTable()
     }
@@ -160,20 +164,28 @@ export class DocumentComponent implements OnInit, AfterViewInit {
             ajax: (dataTablesParameters: any, callback) => {
                 dataTablesParameters.search_status = this.form.value.status;
                 dataTablesParameters.branche_id = this.user?.employees?.branch_id;
+                if (this.type === 'taxinvoice') {
+                    const start = this.taxinvoiceListExportDate(this.form.value.startDate);
+                    const end = this.taxinvoiceListExportDate(this.form.value.endDate);
+                    if (start) {
+                        dataTablesParameters.start_date = start;
+                    }
+                    if (end) {
+                        dataTablesParameters.end_date = end;
+                    }
+                }
                 that._service
                     .getAll(dataTablesParameters, this._activated.snapshot.data.status)
                     .subscribe((resp: any) => {
                         this.dataRow = resp.data;
 
                         // if(this.type === 'taxinvoice') {
-                        //     console.log(resp.data, 'resp');
                         //     const sortedDataDesc =  resp.data.sort((a, b) => {
                         //         const numA = parseInt(a.no.split('/')[1], 10); // แปลงตัวเลขหลัง "/" เป็น integer
                         //         const numB = parseInt(b.no.split('/')[1], 10);
                         //         return numB - numA; // เรียงจากมากไปน้อย
                         //       });
                         //     this.dataRow = sortedDataDesc;
-                        //     console.log(this.dataRow, 'this.dataRow');
                         // }
 
                         this.pages.current_page = resp.current_page;
@@ -335,7 +347,6 @@ export class DocumentComponent implements OnInit, AfterViewInit {
         });
         DialogRef.afterClosed().subscribe((result) => {
             if (result) {
-                console.log(result, 'result')
                 this.rerender();
             }
         });
@@ -351,7 +362,6 @@ export class DocumentComponent implements OnInit, AfterViewInit {
         });
         DialogRef.afterClosed().subscribe((result) => {
             if (result) {
-                console.log(result, 'result')
                 this.rerender();
             }
         });
@@ -367,7 +377,6 @@ export class DocumentComponent implements OnInit, AfterViewInit {
         });
         DialogRef.afterClosed().subscribe((result) => {
             if (result) {
-                console.log(result, 'result')
                 this.rerender();
             }
         });
@@ -383,7 +392,6 @@ export class DocumentComponent implements OnInit, AfterViewInit {
         });
         DialogRef.afterClosed().subscribe((result) => {
             if (result) {
-                console.log(result, 'result')
                 this.rerender();
             }
         });
@@ -406,7 +414,6 @@ export class DocumentComponent implements OnInit, AfterViewInit {
         });
         DialogRef.afterClosed().subscribe((result) => {
             if (result) {
-                console.log(result, 'result')
                 this.rerender();
             }
         });
@@ -423,9 +430,73 @@ export class DocumentComponent implements OnInit, AfterViewInit {
             let branche_id = this.user?.employees?.branch_id
             window.open(environment.API_URL + '/api/taxinvoice/report/' + id + '?branche_id=' + branche_id)
         } else {
-            console.log('No Type');
             return;
         }
+    }
+
+    printTaxInvoice(item: any): void {
+        if (item?.inspection?.id) {
+            window.open(
+                `${environment.API_URL}/api/report/exportPDF/billtax_invioce/${item.inspection.id}`,
+                '_blank'
+            );
+            return;
+        }
+        if (item?.tax_invoice?.id) {
+            const branche_id = this.user?.employees?.branch_id;
+            window.open(
+                `${environment.API_URL}/api/taxinvoice/report/${item.tax_invoice.id}?branche_id=${branche_id}`,
+                '_blank'
+            );
+        }
+    }
+
+    private taxinvoiceListExportDate(value: unknown): string {
+        if (value == null || value === '') {
+            return '';
+        }
+        const d = value instanceof Date ? value : new Date(value as string);
+        if (Number.isNaN(d.getTime())) {
+            return '';
+        }
+        return DateTime.fromJSDate(d).toISODate() ?? '';
+    }
+
+    taxinvoiceListExportQueryString(): string {
+        const params = new URLSearchParams();
+        const status = this.form.value.status;
+        const branche_id = this.user?.employees?.branch_id;
+        if (status) {
+            params.set('search_status', status);
+        }
+        if (branche_id != null && branche_id !== '') {
+            params.set('branche_id', String(branche_id));
+        }
+        const start = this.taxinvoiceListExportDate(this.form.value.startDate);
+        const end = this.taxinvoiceListExportDate(this.form.value.endDate);
+        if (start) {
+            params.set('start_date', start);
+        }
+        if (end) {
+            params.set('end_date', end);
+        }
+        return params.toString();
+    }
+
+    exportPdfTaxinvoiceList(): void {
+        const qs = this.taxinvoiceListExportQueryString();
+        window.open(
+            `${environment.API_URL}/api/report/reportExportPDFtaxinvoice_list${qs ? `?${qs}` : ''}`,
+            '_blank'
+        );
+    }
+
+    exportExcelTaxinvoiceList(): void {
+        const qs = this.taxinvoiceListExportQueryString();
+        window.open(
+            `${environment.API_URL}/api/report/excel/taxinvoice_list${qs ? `?${qs}` : ''}`,
+            '_blank'
+        );
     }
     printPDF_receipt(id: any) {
         window.open(
@@ -456,48 +527,57 @@ export class DocumentComponent implements OnInit, AfterViewInit {
 
         return payments.reduce((total, item) => {
             const price = item?.paid_price ?? 0; // ป้องกันกรณี item เป็น undefined หรือไม่มี key
-            console.log(price, 'price');
 
             return total + price;
         }, 0);
     }
 
+    private taxInvoiceBaseAndVat(data: any): { base: number; vat: number } {
+        if (!data) {
+            return { base: 0, vat: 0 };
+        }
+        const vat = data.tax != null && data.tax !== '' ? Number(data.tax) : 0;
+        let base = data.total != null && data.total !== '' ? Number(data.total) : NaN;
+        if (Number.isNaN(base)) {
+            const totalAmount = data.total_amount != null ? Number(data.total_amount) : 0;
+            base = totalAmount - vat;
+        }
+        if (Number.isNaN(base)) {
+            base = 0;
+        }
+        return { base, vat };
+    }
+
     calculateInvoiceWithWithholding(data: any): number {
-        if (!data || data.total == null || data.tax == null) {
+        if (!data) {
             return 0;
         }
+        const { base, vat } = this.taxInvoiceBaseAndVat(data);
         if (data.withholding_tax === 'Y') {
             const withholdingPercent = data.withholding_tax_percent != null ? data.withholding_tax_percent : 3;
-            const vat = data.tax;
-            const withholdingTax = data.total * withholdingPercent / 100;
-            const total = (data.total + vat) - withholdingTax;
-            return total;
-        } else {
-            const total = data.total + data.tax;
-            return total;
+            const withholdingTax = base * withholdingPercent / 100;
+            return (base + vat) - withholdingTax;
         }
+        const sum = base + vat;
+        return sum !== 0 ? sum : Number(data.total_amount) || 0;
     }
 
     calculateInvoiceWithWithholdingPercent(data: any): number {
-        if (!data || data.total == null || data.tax == null) {
+        if (!data) {
             return 0;
         }
         if (data.withholding_tax === 'Y') {
+            const { base } = this.taxInvoiceBaseAndVat(data);
             const withholdingPercent = data.withholding_tax_percent != null ? data.withholding_tax_percent : 3;
-            const withholdingTax = data.total * withholdingPercent / 100;
-            return withholdingTax;
-        } else {
-            return 0;
+            return base * withholdingPercent / 100;
         }
+        return 0;
     }
 
     sumPaidPriceWithWithholding(inv: any): number {
         if (inv.withholding_tax === 'Y') {
-            console.log(inv);
             const withholdingPercent = inv.withholding_tax_percent != null ? inv.withholding_tax_percent : 3;
             const withholdingTax = inv.total * withholdingPercent / 100;
-            console.log(inv.total);
-            console.log(withholdingPercent);
             return (inv.total + inv.tax) - withholdingTax;
         } else {
             return 0;

@@ -1,5 +1,60 @@
 .reduceHeadPad {
     .mat-form-field {
-        margin-bottom: -16px!important;
+        margin-bottom: -16px !important;
     }
+}
+
+.commission-scroll {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.wide-data-table {
+    width: max-content;
+    min-width: 100%;
+    border-collapse: collapse;
+
+    thead th {
+        font-weight: 600;
+        vertical-align: middle;
+        color: inherit;
+    }
+
+    .col-name {
+        min-width: 11rem;
+        max-width: 18rem;
+    }
+
+    thead tr.service-subhead th {
+        display: table-cell;
+        text-align: center;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        min-width: 4.25rem;
+        padding: 0.5rem 0.35rem;
+        vertical-align: middle;
+        background-color: transparent;
+        color: inherit;
+        opacity: 1;
+    }
+
+    .svc-cell-first {
+        border-left: 2px solid rgba(0, 0, 0, 0.12);
+    }
+
+    .svc-cell {
+        text-align: center;
+        font-variant-numeric: tabular-nums;
+    }
+}
+
+.commission-scroll ::ng-deep .dataTables_wrapper thead tr.service-subhead th,
+.commission-scroll ::ng-deep table.dataTable thead tr.service-subhead th,
+.commission-scroll ::ng-deep table.dataTable thead tr.service-subhead th.sorting,
+.commission-scroll ::ng-deep table.dataTable thead tr.service-subhead th.sorting_disabled {
+    display: table-cell !important;
+    background-color: transparent !important;
+    color: inherit !important;
+    opacity: 1 !important;
+    -webkit-text-fill-color: currentColor !important;
 }

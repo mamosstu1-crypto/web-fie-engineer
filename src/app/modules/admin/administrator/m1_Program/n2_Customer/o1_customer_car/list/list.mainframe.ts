@@ -13,6 +13,7 @@ export class FormDataFrame {
             license_plate: ['', Validators.required],
             province_id: ['', Validators.required],
             vehicle_inspection_types_id: ['', Validators.required],
+            insurance_types_id: ['', Validators.required],
             brand_id: ['', Validators.required],
             model_id: [''],
             chassis_number: [''],

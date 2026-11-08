@@ -21,14 +21,10 @@ export class AddressDialogComponent implements OnInit, OnDestroy {
         @Inject(MAT_DIALOG_DATA) private _data,
         private _matDialogRef: MatDialogRef<AddressDialogComponent>
     ) {
-
         this._data.forEach(element => {
             const fullAddress = `${element.address ?? ''} ${element.provinces?.name_th ?? ''} ${element.districts?.name_th ?? ''} ${element.sub_districts?.name_th ?? ''} ${element.sub_districts?.zip_code ?? ''}`;
             this.address.push(fullAddress)
         });
-        console.log(this.address, 'address');
-
-
     }
 
     // -----------------------------------------------------------------------------------------------------

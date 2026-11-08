@@ -111,7 +111,7 @@
                     <ng-container *ngFor="let work of item.work_orders; let i = index">
                         <tr class="hover:bg-slate-50">
                             <td class="px-2 py-2 text-md border-[1px] border-gray-900">{{ i + 1 }}</td>
-                            <td class="px-2 py-2 text-md border-[1px] border-gray-900">{{ (work.date | date : 'dd/MM/yyyy') ?? '' }}</td>
+                            <td class="px-2 py-2 text-md border-[1px] border-gray-900">{{ (work.date | TH) ?? '' }}</td>
                             <td class="px-2 py-2 text-md border-[1px] border-gray-900">{{ work.no ?? '' }}</td>
                             <td class="px-2 py-2 text-md border-[1px] border-gray-900">{{ work.license_plate ?? '' }}</td>
                             <td class="px-2 py-2 text-md border-[1px] border-gray-900">{{ work.brand_name ?? '' }}</td>

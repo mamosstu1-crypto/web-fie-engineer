@@ -132,7 +132,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
 
         this.formData.valueChanges.subscribe((value) => {
             this.formData.markAsDirty();
-            console.log('value', value);
         });
 
         this.itemFilter.valueChanges
@@ -310,7 +309,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         let formValue = this.formData.value
 
         formValue.type = this.type;
-        console.log(formValue);
         this._US.submitForm(
             formValue,
             action,
@@ -347,8 +345,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     Submit(): void {
-        console.log('form', this.formData.value);
-
         if (this.isEdit) {
             const confirmation = this._fuseConfirm.open({
                 title: 'แก้ไขข้อมูล',
@@ -460,7 +456,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
                     })
                     let formValue = this.formData.value
                     formValue.type = this.type; // Ensure type is always set
-                    console.log('formValue', formValue);
 
                     this._Service.create(formValue).subscribe({
                         next: (resp: any) => {

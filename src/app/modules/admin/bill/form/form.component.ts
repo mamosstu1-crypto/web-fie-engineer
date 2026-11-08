@@ -134,7 +134,6 @@ export class FormComponent implements OnInit, AfterViewInit, OnDestroy {
         this.customer = this._activatedRoute.snapshot.data.customer.data
         this.filterCustomer.next(this.customer.slice());
         this.type = this._activatedRoute.snapshot.data.status
-        console.log(this.type);
 
         this.branch = this._activatedRoute.snapshot.data.branch
 
@@ -540,8 +539,6 @@ export class FormComponent implements OnInit, AfterViewInit, OnDestroy {
                 // Find if there's custom pricing for this document and customer
                 const customPricing = this.doc_price.find(price => price.docs_id === selected.doc_id && price.customer_id === this.form.value.customer_id
                 );
-                console.log(customPricing);
-
 
                 // If custom pricing exists, use it instead of the default price
                 if (customPricing) {
@@ -587,11 +584,9 @@ export class FormComponent implements OnInit, AfterViewInit, OnDestroy {
         const selectedName = event.option.value;
         const selected = this.customer.find(item => item.name === selectedName);
 
-        console.log(selected);
         if(selected.type =='agent') {
             this._Service.getDocBycustomer(selected.id).subscribe((resp: any) => {
                 this.doc_price = resp.data
-                console.log(this.doc_price);
             });
         }
 

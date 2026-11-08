@@ -402,8 +402,6 @@ export class CustomerDialogComponent implements OnInit {
 
         dialogRef.afterClosed().subscribe((result) => {
             if (result) {
-                console.log(result, 'address');
-
                 let returnData = {
                     customer: value,
                     address: result,
@@ -503,7 +501,6 @@ export class CustomerDialogComponent implements OnInit {
         const selected = this.subdistricts.find(
             (item) => item.name_th === selectedName
         );
-        console.log(selected, 'selected');
 
         if (selected) {
             this.form.patchValue({

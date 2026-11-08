@@ -5,8 +5,8 @@
             <div class="flex-auto">
                 <div class="flex flex-col md:flex mb-1">
                     <div class="md:w-full">
-                        <mat-form-field class="w-full">
-                            <mat-label>เลือกสถานะ</mat-label>
+                        <mat-form-field class="w-full" hideRequiredMarker>
+                            <mat-label>เลือกสถานะ<span class="bill-required-star">*</span></mat-label>
                             <mat-select [formControlName]="'status'"placholder="เลือกสถานะ">
                               <mat-option *ngFor="let item of status;" [value]="item.value">
                                 {{item.name}}

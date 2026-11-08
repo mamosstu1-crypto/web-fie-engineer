@@ -134,10 +134,7 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         formValue.branch_id = this.form.value.branch_id ?? this.user?.employees?.branch_id;
 
         this._Service.getDailyReport_new(formValue).subscribe((resp: any) => {
-            console.log('resp',resp);
             this.dataRow = this.applyFixFallback(resp.data);
-            console.log('this.dataRow',this.dataRow);
-
             this._changeDetectorRef.markForCheck()
         })
     }
@@ -193,7 +190,9 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
                 mappedFix = fixFromAll.filter((item: any) => !item?.paid_type || item?.paid_type === 'paid_tran');
             }
             if (key === 'credit') {
-                mappedFix = fixFromAll.filter((item: any) => item?.paid_type === 'paid_credit');
+                mappedFix = fixFromAll.filter(
+                    (item: any) => item?.paid_type === 'credit' || item?.paid_type === 'paid_credit'
+                );
             }
 
             const mappedFixTotal = mappedFix.reduce((sum: number, item: any) => sum + Number(item?.amount || 0), 0);
@@ -235,10 +234,7 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
 
     dateChange() {
         let dateStart = DateTime.fromJSDate(this.form.value.date_start).toFormat('yyyy-MM-dd');
-        console.log(dateStart);
         let dateEnd = DateTime.fromJSDate(this.form.value.date_end).toFormat('yyyy-MM-dd');
-        console.log(dateEnd);
-
     }
 
     clearData() {
@@ -255,7 +251,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
             if (this.itemFilter.invalid) {
                 this.itemFilter.markAsTouched(); // กำหนดสถานะ touched เพื่อแสดง mat-error
             }
-            console.log('No Employee Selected');
             return;
         }
         const selectedData = event; // event จะเป็นออบเจ็กต์ item
@@ -268,13 +263,10 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
             this.form.patchValue({
                 customer_id: selectedData.id
             })
-            console.log(this.form.value);
-
         } else {
             if (this.itemFilter.invalid) {
                 this.itemFilter.markAsTouched(); // กำหนดสถานะ touched เพื่อแสดง mat-error
             }
-            console.log('No Employee Found');
             return;
         }
     }

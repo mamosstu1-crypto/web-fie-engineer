@@ -20,7 +20,6 @@ export class LandingComponent implements OnInit {
         let redirectURL = '/signed-in-redirect';
         redirectURL = 'shelf/list';
         this._router.navigateByUrl(redirectURL);
-        console.log('a')
     }
 
 }

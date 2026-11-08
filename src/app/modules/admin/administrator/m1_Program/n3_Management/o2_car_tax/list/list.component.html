@@ -311,6 +311,11 @@
                 <mat-tab label="รอรับป้าย">
                     <div
                         class="flex flex-col flex-auto min-w-full p-5 overflow-x-auto sm:overflow-x-auto sm:overflow-y-auto">
+                        <p class="mb-3 text-sm text-gray-600">
+                            บันทึกจ่ายจริงแล้วดูคอลัมน์ <strong>เพิ่ม/คืนเงิน</strong> —
+                            ปิดงานและวันชำระทำที่
+                            <a routerLink="/invoice/list" class="text-sky-600 underline">รายการหนี้</a>
+                        </p>
                         <table datatable [dtOptions]="dtOptions4" class="table w-full row-border hover">
                             <thead>
                                 <tr>
@@ -329,6 +334,8 @@
                                     <th class="">ประเภทเอกสาร</th>
                                     <th class="">รับมา</th>
                                     <th class="">จ่ายจริง</th>
+                                    <th class="">หนี้</th>
+                                    <th class="">เพิ่ม/คืนเงิน</th>
                                     <th class="">ค่าธรรมเนียม</th>
                                     <th class="">สถานะ</th>
                                 </tr>
@@ -368,6 +375,20 @@
                                             </ng-template>
                                         </button>
                                     </td>
+                                    <td class="whitespace-nowrap">
+                                        <span *ngIf="item.transaction_status === 'adddebt'"
+                                            class="px-2 py-1 text-sm font-semibold text-yellow-600 bg-yellow-100 rounded-md">เพิ่มหนี้</span>
+                                        <span *ngIf="item.transaction_status === 'reducedebt'"
+                                            class="p-1 text-sm font-semibold text-blue-500 bg-blue-100 rounded-md">ลดหนี้</span>
+                                        <span *ngIf="item.transaction_status === 'closedebt'"
+                                            class="p-1 text-sm font-semibold text-green-500 bg-green-200 rounded-md">ปิดงาน</span>
+                                        <span *ngIf="!item.transaction_status">-</span>
+                                    </td>
+                                    <td class="whitespace-nowrap font-medium"
+                                        [ngClass]="{
+                                            'text-amber-600': item.payextra?.startsWith('เพิ่ม'),
+                                            'text-blue-600': item.payextra?.startsWith('คืน')
+                                        }">{{ item.payextra ?? '-' }}</td>
                                     <td class="">{{ item.commission ?? '-' }}</td>
                                     <td class="">
                                         <mat-form-field appearance="fill" class="justify-center w-full">
@@ -385,7 +406,7 @@
                             </tbody>
                             <tbody *ngIf="dataRow4?.length == 0">
                                 <tr>
-                                    <td colspan="12" class="text-center no-data-available">ไม่มีข้อมูล !</td>
+                                    <td colspan="14" class="text-center no-data-available">ไม่มีข้อมูล !</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -415,6 +436,8 @@
                                     <th class="">ประเภทเอกสาร</th>
                                     <th class="">รับมา</th>
                                     <th class="">จ่ายจริง</th>
+                                    <th class="">หนี้</th>
+                                    <th class="">เพิ่ม/คืนเงิน</th>
                                     <th class="">สถานะ</th>
                                 </tr>
                             </thead>
@@ -454,6 +477,20 @@
                                         <!-- <button mat-button (click)="openEditDialog(item)">{{ item.paytrue ?? 0 }}</button> -->{{
                                         item.paytrue ?? '-' }}
                                     </td>
+                                    <td class="whitespace-nowrap">
+                                        <span *ngIf="item.transaction_status === 'adddebt'"
+                                            class="px-2 py-1 text-sm font-semibold text-yellow-600 bg-yellow-100 rounded-md">เพิ่มหนี้</span>
+                                        <span *ngIf="item.transaction_status === 'reducedebt'"
+                                            class="p-1 text-sm font-semibold text-blue-500 bg-blue-100 rounded-md">ลดหนี้</span>
+                                        <span *ngIf="item.transaction_status === 'closedebt'"
+                                            class="p-1 text-sm font-semibold text-green-500 bg-green-200 rounded-md">ปิดงาน</span>
+                                        <span *ngIf="!item.transaction_status">-</span>
+                                    </td>
+                                    <td class="whitespace-nowrap font-medium"
+                                        [ngClass]="{
+                                            'text-amber-600': item.payextra?.startsWith('เพิ่ม'),
+                                            'text-blue-600': item.payextra?.startsWith('คืน')
+                                        }">{{ item.payextra ?? '-' }}</td>
                                     <td class="">
                                         <mat-form-field appearance="fill" class="justify-center w-full">
                                             <mat-select [value]="item.tax_vehicle"
@@ -470,7 +507,7 @@
                             </tbody>
                             <tbody *ngIf="dataRow5?.length == 0">
                                 <tr>
-                                    <td colspan="11" class="text-center no-data-available">ไม่มีข้อมูล !</td>
+                                    <td colspan="13" class="text-center no-data-available">ไม่มีข้อมูล !</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -523,21 +560,26 @@
 <ng-template #editDialog let-dialogRef>
     <div mat-dialog-title class="text-3xl">อัปเดตข้อมูล</div>
     <div mat-dialog-content class="px-6">
-        <div class="pb-1 text-xl">รับมาๅ: {{ selectedItem?.service_price }}</div>
+        <div class="pb-1 text-xl">รับมา: {{ selectedItem?.service_price }}</div>
         <div class="flex items-center space-x-2">
             <mat-form-field class="flex-1 text-lg">
                 <mat-label>จ่ายจริง</mat-label>
                 <input matInput [(ngModel)]="selectedItem.paytrue" type="number" placeholder="ใส่จำนวนเงินที่จ่ายจริง"
-                    (input)="onPayTrueInput($event)">
+                    (ngModelChange)="onPayTrueChange()">
             </mat-form-field>
             <button mat-raised-button class="ml-2" (click)="setPayTrueToReceived()">เต็มจำนวน</button>
         </div>
+        <p *ngIf="paytrueDebtHint" class="mt-2 text-base font-semibold"
+            [ngClass]="{
+                'text-amber-600': paytrueDebtHint.startsWith('เพิ่ม'),
+                'text-blue-600': paytrueDebtHint.startsWith('คืน'),
+                'text-gray-600': paytrueDebtHint.startsWith('ยอด')
+            }">{{ paytrueDebtHint }}</p>
         <div class="flex items-center space-x-2">
             <mat-form-field class="flex-1 text-lg">
                 <!-- <mat-label>ค่าคอมมิชชัน</mat-label> -->
                 <mat-label>ค่าธรรมเนียม</mat-label>
-                <input matInput [(ngModel)]="selectedItem.commission" type="number" placeholder="ใส่ค่าคอมมิชชัน"
-                    (input)="onPayTrueInput($event)">
+                <input matInput [(ngModel)]="selectedItem.commission" type="number" placeholder="ใส่ค่าคอมมิชชัน">
             </mat-form-field>
         </div>
     </div>
@@ -555,7 +597,7 @@
 </ng-template>
 
 <ng-template #taxRenewalDialog>
-    <div mat-dialog-title class="text-2xl">แก้ไขวันที่ยื่นภาษี</div>
+    <app-dialog-header title="แก้ไขวันที่ยื่นภาษี" (closeClick)="dialogRef?.close()"></app-dialog-header>
 
     <div mat-dialog-content class="px-6">
 

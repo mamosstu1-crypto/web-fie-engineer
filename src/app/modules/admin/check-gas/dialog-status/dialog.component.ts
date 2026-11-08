@@ -109,7 +109,6 @@ export class DialogStatus implements OnInit {
 
     Submit() {
         const dateValue = formatDate(this.formData.get('date')?.value, 'yyyy-MM-dd', 'th-TH');
-        console.log('dateValue',dateValue);
 
         this.formData.patchValue({
             date: dateValue,
@@ -145,8 +144,6 @@ export class DialogStatus implements OnInit {
                 if (result == 'confirmed') {
                     this._service.updateGas(this.data.id, this.formatForm()).subscribe({
                         next: (resp) => {
-                            console.log('resp',resp);
-
                             this.dialogRef.close()
                         },
                         error: (err) => {
@@ -176,8 +173,6 @@ export class DialogStatus implements OnInit {
             const number = parseInt(value, 10);
             if (!isNaN(number)) {
                 this.numberArray.push(number); // เพิ่มตัวเลขลงใน Array
-                console.log(this.numberArray);
-
             } else {
                 alert('กรุณากรอกตัวเลขที่ถูกต้อง');
             }

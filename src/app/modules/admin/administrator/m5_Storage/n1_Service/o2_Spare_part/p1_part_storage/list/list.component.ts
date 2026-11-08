@@ -177,8 +177,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Dialog Operations
     openDialog(item?: any, event?: Event): void {
-        console.log(this.formData.value.image_url);
-
         if (event) { event.stopPropagation(); }
         this.files = null;
         item ? (this.formData.patchValue({
@@ -271,8 +269,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
 
     selectedId: string = '';
     onStatusChange(event: any): void {
-        console.log('id',event);
-
         this.selectedId = event.value;
         this.rerender();
     }

@@ -1,6 +1,6 @@
 <div class="w-full p-8">
     <div>
-        <div mat-dialog-title class="text-2xl font-semibold">สร้างใบกำกับภาษีจากบิล</div>
+        <app-dialog-header title="สร้างใบกำกับภาษีจากบิล" (closeClick)="onClose()"></app-dialog-header>
     </div>
     <div mat-dialog-content class="overflow-y-auto md:max-h-180">
         <form [formGroup]="form">

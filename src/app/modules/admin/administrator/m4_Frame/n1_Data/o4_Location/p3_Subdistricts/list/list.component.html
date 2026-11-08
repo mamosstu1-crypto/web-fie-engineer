@@ -76,8 +76,7 @@
 <ng-template #Dialog>
     <div class="flex flex-col">
         <form [formGroup]="formData">
-            <h2 mat-dialog-title *ngIf="!isEdit">เพิ่มตำบล / แขวง</h2>
-            <h2 mat-dialog-title *ngIf="isEdit">แก้ไขตำบล / แขวง</h2>
+            <app-dialog-header [title]="isEdit ? 'แก้ไขตำบล / แขวง' : 'เพิ่มตำบล / แขวง'" (closeClick)="closeDialog()"></app-dialog-header>
             <mat-dialog-content>
                 <div class="flex flex-col w-full mt-2 gap-2">
                     <!-- Province (cascade trigger, ไม่ได้บันทึก) -->

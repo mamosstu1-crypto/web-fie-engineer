@@ -17,13 +17,13 @@ export class FormDataFrame {
             district_id: ['', Validators.required],
             subdistrict_id: ['', Validators.required],
             address: ['', Validators.required],
-            name: [''],
+            name: ['', Validators.required],
+            province: ['', Validators.required],
+            districts: ['', Validators.required],
+            subdistricts: ['', Validators.required],
             photo: [''],
 
             zip_code: [''],
-            subdistricts: [''],
-            districts: [''],
-            province: [''],
 
             startDate: [''],
             endDate: [''],

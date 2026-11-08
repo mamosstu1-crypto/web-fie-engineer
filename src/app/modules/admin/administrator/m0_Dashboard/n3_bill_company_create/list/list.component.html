@@ -5,7 +5,7 @@
             <div class="pb-5 text-2xl font-medium tracking-tight text-blue-900">ข้อมูลบริษัท</div>
             <div class="grid grid-cols-1 gap-y-1 gap-x-2 md:grid-cols-2">
                 <div class="flex items-center h-full col-span-1">
-                    <mat-label class="w-30 bill-label">ชื่อบริษัท *</mat-label>
+                    <mat-label class="w-30 bill-label">ชื่อบริษัท<span class="bill-required-star">*</span></mat-label>
                     <mat-form-field appearance="fill" class="flex-grow h-full">
                         <input type="text" matInput min="0" [matAutocomplete]="autoCompany" placeholder="ชื่อบริษัท" [formControlName]="'company_name'">
                         <mat-autocomplete #autoCompany="matAutocomplete" (optionSelected)="onVehicleTypeChange($event.option.value)">
@@ -22,7 +22,7 @@
                     </mat-form-field>
                 </div>
                 <div class="flex items-center h-full col-span-1">
-                    <mat-label class="w-30 bill-label">เบอร์ติดต่อ *</mat-label>
+                    <mat-label class="w-30 bill-label">เบอร์ติดต่อ<span class="bill-required-star">*</span></mat-label>
                     <mat-form-field appearance="fill" class="flex-grow h-full">
                         <input matInput min="0" placeholder="เบอร์ติดต่อ" [formControlName]="'phone_number1'" (keydown)="noNaN($event)">
                     </mat-form-field>

@@ -292,6 +292,16 @@ export class StockService {
             })
         );
     }
+    getInvoicesForBilling() {
+        return this.http
+            .get(environment.API_URL + '/api/invoice/show_for_billing')
+            .pipe(
+                tap((resp: any) => {
+                    this._sale_order.next(resp);
+                }),
+                map((resp: any) => resp?.data ?? resp)
+            );
+    }
     getInvoicePaid() {
         return this.http
             .get(environment.API_URL + '/api/invoice/showAllpaid')

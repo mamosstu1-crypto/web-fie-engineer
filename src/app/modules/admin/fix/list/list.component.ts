@@ -223,8 +223,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Dialog Operations
     openDialog(item?: any, event?: Event): void {
-        console.log(this.formData.value.image_url);
-
         if (event) {
             event.stopPropagation();
         }
@@ -360,7 +358,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         });
         DialogRef.afterClosed().subscribe((result) => {
             if (result) {
-                console.log(result, 'result');
                 this.rerender();
             }
         });
@@ -381,8 +378,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     updateWorkOrderPayment(item: any) {
-        console.log(item, 'item');
-
         const DialogRef = this._dialog.open(DialogPayment, {
             disableClose: true,
             width: '60%',
@@ -398,7 +393,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         });
         DialogRef.afterClosed().subscribe((result) => {
             if (result) {
-                console.log(result, 'result')
                 this.rerender();
             }
         });

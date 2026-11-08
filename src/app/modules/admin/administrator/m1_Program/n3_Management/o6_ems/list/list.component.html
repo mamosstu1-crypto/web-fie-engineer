@@ -151,14 +151,13 @@
 
 <ng-template #Dialog>
     <div class="flex flex-col">
-        <form [formGroup]="formData">
-            <h2 mat-dialog-title *ngIf="!isEdit">เพิ่มหมายเลข EMS</h2>
-            <h2 mat-dialog-title *ngIf="isEdit">แก้ไขหมายเลข EMS</h2>
+        <form [formGroup]="formData" class="ems-dialog-form">
+            <app-dialog-header [title]="isEdit ? 'แก้ไขหมายเลข EMS' : 'เพิ่มหมายเลข EMS'" (closeClick)="closeDialog()"></app-dialog-header>
             <mat-dialog-content>
                 <!-- REPLACE CONTENT mt-2-->
                 <div class="flex flex-col w-full mt-2 lg:w-4/4">
                     <div class="w-full flex flex-row space-x-2">
-                        <mff class="w-1/2" [label]="'หมายเลข EMS'" [fCN]="'ems'" [pHold]="''"></mff>
+                        <mff class="w-1/2" [label]="'หมายเลข EMS'" [fCN]="'ems'" [pHold]="''" [requiredMark]="true"></mff>
 
                         <div class="flex flex-col w-1/2">
                             <ngx-dropzone (change)="onSelect($event)"
@@ -180,23 +179,23 @@
                         </div>
                     </div>
                     <div class="w-100* flex flex-row space-x-2">
-                        <mff class="w-50*" [label]="'ชื่อลูกค้า'" [fCN]="'name'" [pHold]="''"></mff>
+                        <mff class="w-50*" [label]="'ชื่อลูกค้า'" [fCN]="'name'" [pHold]="''" [requiredMark]="true"></mff>
                         <mff class="w-50*" [label]="'หมายเลขบิล'" [fCN]="'no'" [readonly]="true"></mff>
                     </div>
                     <div class="w-100* flex flex-row space-x-2">
-                        <mff class="w-100*" [label]="'ที่อยู่'" [fCN]="'address'" [pHold]="'ที่อยู่'"></mff>
+                        <mff class="w-100*" [label]="'ที่อยู่'" [fCN]="'address'" [pHold]="'ที่อยู่'" [requiredMark]="true"></mff>
                     </div>
                     <div class="w-100* flex flex-row space-x-2">
                         <mfs class="w-50*" [label]="'จังหวัด'" [fCN]="'province'" [KEY]="'name_th'"
-                            [sift]="filteredProvinces" form="formData">
+                            [sift]="filteredProvinces" form="formData" [requiredMark]="true">
                         </mfs>
                         <mfs class="w-50*" [label]="'อำเภอ'" [fCN]="'districts'" [KEY]="'name_th'"
-                            [sift]="filteredDistricts" form="formData">
+                            [sift]="filteredDistricts" form="formData" [requiredMark]="true">
                         </mfs>
                     </div>
                     <div class="w-100* flex flex-row space-x-2">
                         <mfs class="w-50*" [label]="'ตำบล'" [fCN]="'subdistricts'" [KEY]="'name_th'"
-                            [sift]="filteredSubDistricts" form="formData">
+                            [sift]="filteredSubDistricts" form="formData" [requiredMark]="true">
                         </mfs>
                         <mff class="w-50*" [label]="'รหัสไปรษณีย์'" [fCN]="'zip_code'" [pHold]="'ที่อยู่'"></mff>
                     </div>

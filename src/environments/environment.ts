@@ -7,7 +7,7 @@ export const environment = {
     // API_URL: 'http://localhost/work-asha/Backend_BNI/public',
     // API_URL: 'https://fie-api.dev-asha9.com',
     // API_URL: 'https://fie-api-uat.dev-asha9.com',
-    API_URL: (window as any)['__env']?.API_URL || 'http://127.0.0.1:8000',
+    API_URL: (window as any)['__env']?.API_URL || 'https://api.fie-engineer.com',
     // API_URL: 'http://localhost/storage_BNI/public',
 };
 

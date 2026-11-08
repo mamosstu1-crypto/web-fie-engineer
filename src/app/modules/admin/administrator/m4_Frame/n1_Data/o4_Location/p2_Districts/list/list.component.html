@@ -62,8 +62,7 @@
 <ng-template #Dialog>
     <div class="flex flex-col">
         <form [formGroup]="formData">
-            <h2 mat-dialog-title *ngIf="!isEdit">เพิ่มอำเภอ / เขต</h2>
-            <h2 mat-dialog-title *ngIf="isEdit">แก้ไขอำเภอ / เขต</h2>
+            <app-dialog-header [title]="isEdit ? 'แก้ไขอำเภอ / เขต' : 'เพิ่มอำเภอ / เขต'" (closeClick)="closeDialog()"></app-dialog-header>
             <mat-dialog-content>
                 <div class="flex flex-col w-full mt-2 gap-2">
                     <!-- Province -->

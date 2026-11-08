@@ -386,7 +386,6 @@ export class UtilityService extends BaseService {
 
             // ตั้งค่าลง FormControl
             formName.get(controlName)?.setValue(localDate);
-            console.log(`${controlName}:`, localDate); // ตรวจสอบค่าใน Console
         }
     }
 

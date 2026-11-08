@@ -1,6 +1,23 @@
 button { font-family: 'Prompt'; }
 mat-form-field, mff { display: inline; }
 
+.bill-required-star {
+    color: #ef4444 !important;
+    margin-left: 0.25em;
+    font-weight: 600;
+}
+
+:host ::ng-deep .ems-dialog-form {
+    .mat-form-field-required-marker {
+        display: none !important;
+    }
+
+    mat-form-field.mat-form-field-invalid .mat-form-field-label,
+    mat-form-field.mat-form-field-invalid .mat-form-field-label mat-label {
+        color: rgba(0, 0, 0, 0.6) !important;
+    }
+}
+
 .reduceHeadPad {
     .mat-form-field {
         margin-bottom: -16px !important;

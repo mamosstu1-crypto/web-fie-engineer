@@ -216,7 +216,13 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         this._US.confirmAction('แก้ไขรายการ', 'คุณต้องการแก้ไขรายการใช่หรือไม่', this._fuseConfirm,
             () => {
                 this._Service.update(this.formatForm(), this.formData.get('id').value).subscribe({
-                    next: (resp: any) => { this.updateResp = resp; this.closeDialog(); this.rerender(); },
+                    next: (resp: any) => {
+                        this.updateResp = resp;
+                        this.files = null;
+                        this.files_under = null;
+                        this.closeDialog();
+                        this.rerender();
+                    },
                     error: (error: any) => {
                         this._US.confirmAction('ข้อผิดพลาด', error.error.message, this._fuseConfirm,
                         () => {}, { showConfirm: false, showCancel: false, }
@@ -225,8 +231,12 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     private formatForm(): any {
         const formData = new FormData();
+        const skipKeys = new Set(['logo', 'logo_under', 'logo_url', 'logo_under_url']);
         Object.entries(this.formData.value).forEach(([key, value]: any[]) => {
-            if (key != 'logo') { formData.append(key, value); }
+            if (skipKeys.has(key) || value === null || value === undefined) {
+                return;
+            }
+            formData.append(key, value);
         });
         if (this.files) {
             formData.append('logo', this.files);
@@ -267,17 +277,18 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     // Dialog Operations
-    test(nay?){
-        console.log("111", nay);
-        console.log("222", this.formData.value);
-        console.log("333", this.files);
-    }
     dialogRef: any; addressDialogRef: any;
     openDialog(item?: any, event?: Event): void {
         if (event) { event.stopPropagation(); }
         this.files = null;
+        this.files_under = null;
+        this.imagePreview = null;
+        this.imagePreview_under = null;
         if (item) {
-            this._Service.getBracheID(item.id).subscribe((resp) => { this.formData.patchValue({ ...resp.data }); });
+            this._Service.getBracheID(item.id).subscribe((resp) => {
+                this.formData.patchValue({ ...resp.data });
+                this._changeDetectorRef.markForCheck();
+            });
             this.isEdit = true;
         } else {
             this.isEdit = false;

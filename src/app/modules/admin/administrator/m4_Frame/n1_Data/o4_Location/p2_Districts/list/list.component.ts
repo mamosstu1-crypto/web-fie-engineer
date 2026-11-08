@@ -42,10 +42,7 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
     public isEdit: boolean = false;
     public dialogWidth: number = 40;
 
-    // Province dropdown data
     public listProvinces: any[] = [];
-
-    // Filter state (ส่ง additionalParams ไปยัง server)
     public filterParams: any = {};
     public filterProvinceId: string = '';
 
@@ -110,7 +107,7 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
                 id: item.id,
                 name_th: item.name_th,
                 name_en: item.name_en,
-                province_id: item.province_id,
+                province_id: item.province_id ?? item.provinces?.id,
             });
             this.isEdit = true;
         } else {

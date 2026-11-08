@@ -58,7 +58,8 @@ export class AuthService {
                     this._requireResetPassword = true;
                     this._jwt = response.access_token;
 
-                    localStorage.setItem('user', JSON.stringify(response.user));
+                    const user = this._userWithBranchLabel(response.user);
+                    localStorage.setItem('user', JSON.stringify(user));
                     localStorage.setItem('accessToken', response.access_token);
                     localStorage.setItem('role', JSON.stringify(response.role));
                     // localStorage.setItem('permission', JSON.stringify(response.user.user_position[0].roles.role_permissions[0].permissions));
@@ -145,5 +146,21 @@ export class AuthService {
 
     get jwt(): string {
         return this._jwt;
+    }
+
+    private _userWithBranchLabel(user: any): any {
+        if (!user) {
+            return user;
+        }
+        const emp = user.employees ?? user.Employees;
+        if (!emp) {
+            return user;
+        }
+        const branch = emp.branches ?? emp.Branches;
+        const label = (branch?.business_name ?? branch?.name ?? '').trim();
+        if (label) {
+            emp.branch_display_name = label;
+        }
+        return user;
     }
 }

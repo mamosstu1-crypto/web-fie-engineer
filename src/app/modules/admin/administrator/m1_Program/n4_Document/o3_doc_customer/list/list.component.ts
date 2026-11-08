@@ -178,7 +178,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private onDocSelected(event: any): void {
         const selectedDoc = event.option.value;
-        console.log('selectedDoc', selectedDoc);
 
         this.formData.patchValue({
             docs_id: selectedDoc.id,
@@ -186,8 +185,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         });
 
         this.docsControl.setValue(selectedDoc.name);
-        console.log('this.formData', this.formData.value);
-
     }
 
     private _filterCus(value: any): any[] {
@@ -204,17 +201,11 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private onCusSelected(event: any): void {
-        console.log('event', event);
-
         const selectedCus = event.option.value;
-        console.log('selectedCus', selectedCus);
-
         this.formData.patchValue({
             customer_id: selectedCus.id,
             customer_name: selectedCus.name
         });
         this.cusControl.setValue(selectedCus.name);
-        console.log('this.formData', this.formData.value);
-
     }
 }

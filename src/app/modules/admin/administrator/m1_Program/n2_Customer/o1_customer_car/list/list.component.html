@@ -78,8 +78,8 @@
 
 <ng-template #Dialog>
     <div class="flex flex-col">
-        <form [formGroup]="formData">
-            <h2 mat-dialog-title>ข้อมูลรถ</h2>
+        <form [formGroup]="formData" class="fie-required-form">
+            <app-dialog-header title='ข้อมูลรถ' (closeClick)="closeDialog(dialogRef1)"></app-dialog-header>
             <mat-dialog-content>
                 <mat-tab-group>
                     <mat-tab label="ข้อมูลรถ">
@@ -98,8 +98,8 @@
                                             </mat-autocomplete>
                                         </mat-form-field>
                                     </div>
-                                    <mat-form-field appearance="fill" class="w-50*">
-                                        <mat-label>วันที่จดทะเบียน</mat-label>
+                                    <mat-form-field appearance="fill" class="w-50*" hideRequiredMarker>
+                                        <mat-label>วันที่จดทะเบียน<span class="bill-required-star">*</span></mat-label>
                                         <input matInput [matDatepicker]="registrationdate" [formControlName]="'registration_date'"
                                             (input)="onDateInput($event)" (dateChange)="onDateChange($event, 'registration_date', formData)"
                                             placeholder="DD/MM/YYYY">
@@ -109,8 +109,8 @@
                                 </div>
                                 <div class="w-50* flex flex-row space-x-2">
                                     <mff class="w-50*" [label]="'เลขทะเบียน'" [fCN]="'license_plate'" [pHold]="''"></mff>
-                                    <mat-form-field class="w-50*">
-                                        <mat-label>จังหวัด</mat-label>
+                                    <mat-form-field appearance="fill" class="w-50*" hideRequiredMarker>
+                                        <mat-label>จังหวัด<span class="bill-required-star">*</span></mat-label>
                                         <mat-select [formControlName]="'province_id'">
                                             <mat-option value="">--เลือกจังหวัด--</mat-option>
                                             <mat-option *ngFor="let item of listProvinces" [value]="item.id">
@@ -119,12 +119,10 @@
                                         </mat-select>
                                     </mat-form-field>
                                 </div>
-
                             </div>
-                            <!-- ประเภท -->
                             <div class="flex flex-row w-full space-x-2 lg:w-4/4 sm:py-4">
-                                <mat-form-field appearance="fill" class="w-50*">
-                                    <mat-label>ประเภทรถ</mat-label>
+                                <mat-form-field appearance="fill" class="w-50*" hideRequiredMarker>
+                                    <mat-label>ประเภทรถ<span class="bill-required-star">*</span></mat-label>
                                     <mat-select [formControlName]="'vehicle_inspection_types_id'">
                                         <mat-option *ngFor="let item of listInspection" [value]="item.id">
                                             <ng-container *ngIf="item?.type">[ {{ item.type }}</ng-container>
@@ -133,9 +131,9 @@
                                         </mat-option>
                                     </mat-select>
                                 </mat-form-field>
-                                <mat-form-field appearance="fill" class="w-50*">
-                                    <mat-label>ประเภท พ.ร.บ</mat-label>
-                                    <mat-select [formControlName]="'vehicle_inspection_types_id'">
+                                <mat-form-field appearance="fill" class="w-50*" hideRequiredMarker>
+                                    <mat-label>ประเภท พ.ร.บ.<span class="bill-required-star">*</span></mat-label>
+                                    <mat-select [formControlName]="'insurance_types_id'">
                                         <mat-option value="">--เลือกประเภท--</mat-option>
                                         <mat-option *ngFor="let item of listInsurance" [value]="item.id">
                                             <ng-container *ngIf="item?.code">[ {{ item.code }} ]</ng-container>
@@ -144,11 +142,10 @@
                                     </mat-select>
                                 </mat-form-field>
                             </div>
-                            <!-- ยี่ห้อรถ/รุ่นรถ/เลขตัวรถ -->
                             <div class="flex flex-row w-full mt-6 space-x-2 lg:w-4/4 sm:py-4">
                                 <div class="w-1/2 flex flex-row space-x-2">
-                                    <mat-form-field class="w-50*">
-                                        <mat-label>ยี่ห้อรถ</mat-label>
+                                    <mat-form-field appearance="fill" class="w-50*" hideRequiredMarker>
+                                        <mat-label>ยี่ห้อรถ<span class="bill-required-star">*</span></mat-label>
                                         <mat-select [formControlName]="'brand_id'" (selectionChange)="onBrandChange()">
                                             <mat-option value="">--เลือกยี่ห้อรถ--</mat-option>
                                             <mat-option *ngFor="let item of listBrands" [value]="item.id">
@@ -156,7 +153,7 @@
                                             </mat-option>
                                         </mat-select>
                                     </mat-form-field>
-                                    <mat-form-field class="w-50*">
+                                    <mat-form-field appearance="fill" class="w-50*">
                                         <mat-label>รุ่นรถ</mat-label>
                                         <mat-select [formControlName]="'model_id'" [disabled]="!isBrandSelected">
                                             <mat-option value="">--เลือกรุ่นรถ--</mat-option>
@@ -167,8 +164,8 @@
                                     </mat-form-field>
                                 </div>
                                 <mff class="w-1/4" [label]="'เลขตัวรถ'" [fCN]="'chassis_number'" [pHold]="''"></mff>
-                                <mat-form-field class="w-1/4">
-                                    <mat-label>ประเภทเชื้อเพลิง</mat-label>
+                                <mat-form-field appearance="fill" class="w-1/4" hideRequiredMarker>
+                                    <mat-label>ประเภทเชื้อเพลิง<span class="bill-required-star">*</span></mat-label>
                                     <mat-select [formControlName]="'fuel_type'">
                                         <mat-option [value]="'oil'">น้ำมัน</mat-option>
                                         <mat-option [value]="'gas'">EV/แก๊ส 100%</mat-option>
@@ -176,28 +173,26 @@
                                     </mat-select>
                                 </mat-form-field>
                             </div>
-                            <!-- เลขเครื่องยนต์/เชื้อเพลิง/ซีซี -->
                             <div class="flex flex-row w-full space-x-2 lg:w-4/4 sm:py-4">
                                 <mff class="w-1/4" [label]="'เลขเครื่องยนต์'" [fCN]="'engine_number'" [pHold]="''"></mff>
-                                <mat-form-field class="w-1/4">
+                                <mat-form-field appearance="fill" class="w-1/4">
                                     <mat-label>ชนิดเชื้อเพลิง</mat-label>
                                     <mat-select [formControlName]="'fuel'">
-                                        <mat-option  [value]="'เบนซิน'">เบนซิน</mat-option>
-                                        <mat-option  [value]="'ดีเซล'">ดีเซล</mat-option>
-                                        <mat-option  [value]="'ไฟฟ้า'">ไฟฟ้า</mat-option>
-                                        <mat-option  [value]="'เบนซินไฟฟ้า'">เบนซินไฟฟ้า</mat-option>
-                                        <mat-option  [value]="'ดีเซลไฟฟ้า'">ดีเซลไฟฟ้า</mat-option>
-                                        <mat-option  [value]="'ก๊าซอย่างเดียว'">ก๊าซอย่างเดียว</mat-option>
-                                        <mat-option  [value]="'เบนซินสลับก๊าซ'">เบนซินสลับก๊าซ</mat-option>
-                                        <mat-option  [value]="'เบนซินไฟฟ้าสลับก๊าซ'">เบนซินไฟฟ้าสลับก๊าซ</mat-option>
-                                        <mat-option  [value]="'ดีเซลรวมก๊าซ'">ดีเซลรวมก๊าซ</mat-option>
-                                        <mat-option  [value]="'ดีเซลไฟฟ้ารวมก๊าซ'">ดีเซลไฟฟ้ารวมก๊าซ</mat-option>
+                                        <mat-option [value]="'เบนซิน'">เบนซิน</mat-option>
+                                        <mat-option [value]="'ดีเซล'">ดีเซล</mat-option>
+                                        <mat-option [value]="'ไฟฟ้า'">ไฟฟ้า</mat-option>
+                                        <mat-option [value]="'เบนซินไฟฟ้า'">เบนซินไฟฟ้า</mat-option>
+                                        <mat-option [value]="'ดีเซลไฟฟ้า'">ดีเซลไฟฟ้า</mat-option>
+                                        <mat-option [value]="'ก๊าซอย่างเดียว'">ก๊าซอย่างเดียว</mat-option>
+                                        <mat-option [value]="'เบนซินสลับก๊าซ'">เบนซินสลับก๊าซ</mat-option>
+                                        <mat-option [value]="'เบนซินไฟฟ้าสลับก๊าซ'">เบนซินไฟฟ้าสลับก๊าซ</mat-option>
+                                        <mat-option [value]="'ดีเซลรวมก๊าซ'">ดีเซลรวมก๊าซ</mat-option>
+                                        <mat-option [value]="'ดีเซลไฟฟ้ารวมก๊าซ'">ดีเซลไฟฟ้ารวมก๊าซ</mat-option>
                                     </mat-select>
                                 </mat-form-field>
                                 <mff class="w-1/4" [label]="'ซีซี'" [fCN]="'cc'" [pHold]="''"></mff>
                                 <mff class="w-1/4" [label]="'ไมล์'" [fCN]="'mileage'" [pHold]="''"></mff>
                             </div>
-                            <!-- น้ำหนักรถ/น้ำหนักบรรทุก/จำนวนที่นั่ง -->
                             <div class="flex flex-row w-full space-x-2 lg:w-4/4 sm:py-4">
                                 <mff class="w-1/5" [label]="'น้ำหนักรถ'" [fCN]="'weight'" [pHold]="''"></mff>
                                 <mff class="w-1/5" [label]="'น้ำหนักบรรทุก'" [fCN]="'weight_loaded'" [pHold]="''"></mff>
@@ -343,7 +338,7 @@
 <ng-template #HullDialog>
     <div class="flex flex-col">
         <form [formGroup]="formGas_Edit">
-            <h2 mat-dialog-title>แก้ไขข้อมูลตัวถัง</h2>
+            <app-dialog-header title='แก้ไขข้อมูลตัวถัง' (closeClick)="closeDialog(dialogRef2)"></app-dialog-header>
             <mat-dialog-content>
                 <div class="flex flex-row w-full mt-8 space-x-2 lg:w-4/4 sm:py-4">
                     <div class="w-60* flex flex-row space-x-2">
@@ -394,7 +389,7 @@
 <ng-template #AddGasDialog>
     <div class="flex flex-col">
         <form [formGroup]="formGas_Add">
-            <h2 mat-dialog-title>เพิ่มข้อมูลถัง</h2>
+            <app-dialog-header title='เพิ่มข้อมูลถัง' (closeClick)="closeDialog(addGasDialogRef)"></app-dialog-header>
             <mat-dialog-content>
                 <div formArrayName="gas">
                     <div class="flex flex-row" *ngFor="let group of gas.controls; let i = index" [formGroupName]="i">

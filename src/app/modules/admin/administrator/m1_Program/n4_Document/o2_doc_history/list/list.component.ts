@@ -183,6 +183,5 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         });
 
         this.docCustomerControl.setValue(`${selectedDoc.doc.name} ${selectedDoc.customer.name} [${selectedDoc.total_qty}]`);
-        console.log('this.formData', this.formData.value);
     }
 }

@@ -17,6 +17,7 @@ import { MatTabChangeEvent } from '@angular/material/tabs';
 import { values } from 'lodash';
 import { MatDatepickerInputEvent } from '@angular/material/datepicker';
 import { DialogDetail } from '../dialog-payment/dialog.component';
+import { environment } from 'environments/environment';
 
 @Component({
     selector: 'list',
@@ -57,7 +58,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
     private start: number;
     private _formDataService: any;
     public status: FormGroup;
-
     constructor(
         private _changeDetectorRef: ChangeDetectorRef,
         private _fuseConfirm: FuseConfirmationService,
@@ -94,6 +94,11 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         idsArray.clear();
     }
 
+    private loginBranchId(): string | number | null {
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+        return (user?.employees ?? user?.Employees)?.branch_id ?? null;
+    }
+
     loadTable(status: string, tableIndex: number): void {
         const dtOptionsKey = `dtOptions${tableIndex}`;
         const pagesKey = `pages${tableIndex}`;
@@ -103,6 +108,9 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
             serverSide: true, processing: true, responsive: true,
             language: { url: 'https://cdn.datatables.net/plug-ins/1.11.3/i18n/th.json' },
             ajax: (dataTablesParameters: any, callback) => {
+                const user = JSON.parse(localStorage.getItem('user') || 'null');
+                dataTablesParameters.branch_id =
+                    (user?.employees ?? user?.Employees)?.branch_id ?? null;
                 this.currentStart = dataTablesParameters.start;
                 dataTablesParameters.tax_vehicle = status;
                 dataTablesParameters.start_date = this.formData.get('startDate')?.value;
@@ -170,8 +178,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
     );}
 
     openDialogdetail(item?: any, event?: Event){
-        console.log('item',item);
-        console.log('event',event);
         const dialogRef = this._matDialog.open(DialogDetail, {
             width: '500vh',
             maxWidth: '90%',
@@ -183,5 +189,39 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         dialogRef.afterClosed().subscribe((result) => {
             this.rerender();
         });
+    }
+
+    pdf(): void {
+        const startDate =
+            this.formData.get('startDate')?.value ||
+            this._US.pdfDefaultDate('firstDayOfMonth');
+        const endDate =
+            this.formData.get('endDate')?.value ||
+            this._US.pdfDefaultDate('lastDayOfMonth');
+        const formatSDate = this._US.pdfDateFormat(startDate);
+        const formatEDate = this._US.pdfDateFormat(endDate);
+        const branch_id = this.loginBranchId();
+
+        window.open(
+            `${environment.API_URL}/api/report/reportExportPDFextent_customer?start_date=${formatSDate}&end_date=${formatEDate}&branch_id=${branch_id}`,
+            '_blank'
+        );
+    }
+
+    excel(): void {
+        const startDate =
+            this.formData.get('startDate')?.value ||
+            this._US.pdfDefaultDate('firstDayOfMonth');
+        const endDate =
+            this.formData.get('endDate')?.value ||
+            this._US.pdfDefaultDate('lastDayOfMonth');
+        const formatSDate = this._US.pdfDateFormat(startDate);
+        const formatEDate = this._US.pdfDateFormat(endDate);
+        const branch_id = this.loginBranchId();
+
+        window.open(
+            `${environment.API_URL}/api/report/excel/extent_customer?start_date=${formatSDate}&end_date=${formatEDate}&branch_id=${branch_id}`,
+            '_blank'
+        );
     }
 }

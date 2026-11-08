@@ -201,9 +201,6 @@ export class ListfromComponent implements OnInit, AfterViewInit, OnDestroy {
                 total_amount: 0,
             })
         }
-        console.log(this.form.value);
-
-
         this.itemFilter.valueChanges
             .pipe(takeUntil(this._onDestroy))
             .subscribe(() => {
@@ -350,7 +347,6 @@ export class ListfromComponent implements OnInit, AfterViewInit, OnDestroy {
                                 })
                                 let formValue = this.form.value
                     formValue.cha_no = this.numberArray
-                    console.log(formValue);
                     this._Service.update(this.Id, formValue).subscribe({
                         next: (resp: any) => {
                             this._router.navigate(['check-gas/list']);
@@ -438,7 +434,6 @@ export class ListfromComponent implements OnInit, AfterViewInit, OnDestroy {
                     delete formValue.mileage
                     delete formValue.chassis_number
                     delete formValue.engine_number
-                    console.log('formValue', formValue);
                     this._Service.create(formValue).subscribe({
                         next: (resp: any) => {
                             this._router.navigate(['check-gas/list']);
@@ -533,7 +528,6 @@ export class ListfromComponent implements OnInit, AfterViewInit, OnDestroy {
 
         dialogRef.afterClosed().subscribe(result => {
             if (result && value === 'NEW') {
-                console.log(result);
                 const fullAddress = `${result.address?.address} ${result.address?.provinces?.name_th} ${result.address?.districts?.name_th} ${result.address?.sub_districts?.name_th} ${result.address?.sub_districts?.zip_code}`;
                 this.form.patchValue({
                     customer_id: result.customer?.id,
@@ -546,7 +540,6 @@ export class ListfromComponent implements OnInit, AfterViewInit, OnDestroy {
                     customer_is_headquarter: result.customer?.is_headquarter,
                 })
             } else if (result && value === 'LIST') {
-                // console.log(result);
                 this.form.patchValue({
                     customer_id: result.customer?.id,
                     customer_no: result.customer?.no,
@@ -557,10 +550,6 @@ export class ListfromComponent implements OnInit, AfterViewInit, OnDestroy {
                     customer_tax_id: result.customer?.tax_id,
                     customer_is_headquarter: result.customer?.is_headquarter,
                 })
-                // console.log(this.form.value);
-            } else {
-                console.log('no data');
-
             }
         });
     }
@@ -615,7 +604,6 @@ export class ListfromComponent implements OnInit, AfterViewInit, OnDestroy {
                     engine_number: result.engine_number,
                 })
             } else if (result && value === 'LIST') {
-                console.log(result);
                 this.form.patchValue({
                     vehicle_id: result?.id,
                     brand_name: result.vehicle_brands?.name,
@@ -625,10 +613,6 @@ export class ListfromComponent implements OnInit, AfterViewInit, OnDestroy {
                     chassis_number: result.chassis_number,
                     engine_number: result.engine_number,
                 })
-                console.log(this.form.value);
-            } else {
-                console.log('no data');
-
             }
         });
     }
@@ -644,8 +628,6 @@ export class ListfromComponent implements OnInit, AfterViewInit, OnDestroy {
             const number = parseInt(value, 10);
             if (!isNaN(number)) {
                 this.numberArray.push(number); // เพิ่มตัวเลขลงใน Array
-                console.log(this.numberArray);
-
             } else {
                 alert('กรุณากรอกตัวเลขที่ถูกต้อง');
             }

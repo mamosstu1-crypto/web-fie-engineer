@@ -17,8 +17,6 @@ export class InspectionBillComponent implements OnInit {
     private _service: Service,
     private _activatedRoute : ActivatedRoute
   ) {
-    console.log(this._activatedRoute.snapshot.paramMap['id'], 'id');
-    
     this._service.getData(2459).subscribe((resp: any) => {
         this.data = resp.data;
     })

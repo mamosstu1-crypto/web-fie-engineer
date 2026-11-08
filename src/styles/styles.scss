@@ -22,5 +22,18 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 mat-label { font-weight: 700 !important; font-family: 'Prompt'; }
 .mat-form-field { display: inline; }
 
+/* ดอกจันทร์บังคับกรอก (dialog / ฟอร์มที่ไม่ได้อยู่ใต้ :host ของหน้า) */
+.bill-required-star,
+mat-label .bill-required-star,
+.fie-required-form .bill-required-star {
+    color: #ef4444 !important;
+    margin-left: 0.25em;
+    font-weight: 600;
+}
+
+.fie-required-form .mat-form-field-required-marker {
+    display: none !important;
+}
+
 * { font-family: 'Prompt'; }
 

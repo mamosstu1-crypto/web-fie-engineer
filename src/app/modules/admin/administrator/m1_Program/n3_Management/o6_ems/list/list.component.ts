@@ -214,9 +214,7 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
             displayStart: this.start, serverSide: true, processing: true, responsive: true,
             language: { url: 'https://cdn.datatables.net/plug-ins/1.11.3/i18n/th.json' },
             ajax: (dataTablesParameters: any, callback) => {
-                const user = JSON.parse(localStorage.getItem('user'));
-                const branch_id =  user?.employees?.branch_id;
-                dataTablesParameters.branch_id = branch_id;
+                dataTablesParameters.branch_id = this.loginBranchId();
                 this.currentStart = dataTablesParameters.start;
                 dataTablesParameters.ems = status;
                 dataTablesParameters.start_date = this.formData.get('startDate')?.value;
@@ -248,7 +246,15 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // CRUD Operations
     // create(): void { this._US.createItem(this._Service, this._fuseConfirm, this.submitForm.bind(this), this.createResp); }
+    private validateEmsForm(): boolean {
+        this.formData.markAllAsTouched();
+        return this.formData.valid;
+    }
+
     create(): void {
+        if (!this.validateEmsForm()) {
+            return;
+        }
         this._US.confirmAction('สร้างรายการใหม่', 'คุณต้องการสร้างรายการใหม่ใช่หรือไม่', this._fuseConfirm,
             () => {
                 this._Service.create(this.formatForm()).subscribe({
@@ -265,6 +271,9 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     // update(): void { this._US.updateItem(this.formData, this._Service, this._fuseConfirm, this.submitForm.bind(this), this.updateResp); }
     update(): void {
+        if (!this.validateEmsForm()) {
+            return;
+        }
         this._US.confirmAction('แก้ไขรายการ', 'คุณต้องการแก้ไขรายการใช่หรือไม่', this._fuseConfirm,
             () => {
                 this._Service.update(this.formatForm(), this.formData.get('id').value).subscribe({
@@ -336,11 +345,20 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         this.formData, action, this._changeDetectorRef, this._fuseConfirm, this, this.rerender.bind(this), this.closeDialog.bind(this)
     );}
 
-    envelopeAddress(id: number): void { window.open(`${environment.API_URL}/api/report/exportPDF/addresEms/${id}?branch_id=1`); }
+    private loginBranchId(): string | number | null {
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+        return (user?.employees ?? user?.Employees)?.branch_id ?? null;
+    }
+
+    envelopeAddress(id: number): void {
+        const branchId = this.loginBranchId() ?? '';
+        window.open(
+            `${environment.API_URL}/api/report/exportPDF/addresEms/${id}?branch_id=${branchId}`
+        );
+    }
 
     pdf() {
-        const user = JSON.parse(localStorage.getItem('user'));
-        const branch_id =  user?.employees?.branch_id;
+        const branch_id = this.loginBranchId();
         const startDate = this.formData.get('startDate')?.value || this._US.pdfDefaultDate('firstDayOfMonth');
         const endDate = this.formData.get('endDate')?.value || this._US.pdfDefaultDate('lastDayOfMonth');
         const formatSDate = this._US.pdfDateFormat(startDate);
@@ -350,8 +368,7 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     excel() {
-        const user = JSON.parse(localStorage.getItem('user'));
-        const branch_id =  user?.employees?.branch_id;
+        const branch_id = this.loginBranchId();
         const startDate =
             this.formData.get('startDate')?.value ||
             this._US.pdfDefaultDate('firstDayOfMonth');

@@ -64,9 +64,10 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
     public currentStart: number = 0;
     public isEdit: boolean = false;
     public dialogWidth: number = 40; // scale in %
-    public selectedTabIndex: number;
+    public selectedTabIndex: number = 0;
 
     public listInsurType: any[] = [];
+    private user: any;
 
     @ViewChildren(DataTableDirective) dtElements: QueryList<DataTableDirective>;
     @ViewChild(MatPaginator) _paginator: MatPaginator;
@@ -86,6 +87,7 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         private _formDataService: FormDataService,
         private _US: UtilityService
     ) {
+        this.user = JSON.parse(localStorage.getItem('user') || 'null');
         this.formData = this._formBuilder.group({
             id: ['', Validators.required],
             result: [''],
@@ -146,7 +148,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
             default:
                 this.type = '';
         }
-        console.log('Updated search_status:', this.type);
         this.rerender();
     }
 
@@ -159,6 +160,7 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
             pageLength: 25,
             serverSide: true,
             processing: true,
+            order: [[2, 'desc']],
             language: {
                 url: 'https://cdn.datatables.net/plug-ins/1.11.3/i18n/th.json',
             },
@@ -166,6 +168,8 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
                 dataTablesParameters.status = this.type;
                 dataTablesParameters.date_start = this.formData.get('startDate')?.value;
                 dataTablesParameters.date_end = this.formData.get('endDate')?.value;
+                dataTablesParameters.branch_id =
+                    (this.user?.employees ?? this.user?.Employees)?.branch_id ?? null;
 
                 // if (dataTablesParameters.order && dataTablesParameters.order.length > 0) {
                 //     const order = dataTablesParameters.order[0];
@@ -177,17 +181,14 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
                     .getPage_invoice(dataTablesParameters)
                     .subscribe((resp: any) => {
                         this.dataRow = resp.data;
-                        console.log('Data:', this.dataRow);
 
                         this.pages.current_page = resp.current_page;
                         this.pages.last_page = resp.last_page;
                         this.pages.per_page = resp.per_page;
-                        if (resp.current_page > 1) {
-                            this.pages.begin =
-                                resp.per_page * resp.current_page - 1;
-                        } else {
-                            this.pages.begin = 0;
-                        }
+                        this.pages.begin =
+                            resp.current_page > 1
+                                ? resp.per_page * (resp.current_page - 1)
+                                : 0;
 
                         callback({
                             recordsTotal: resp.total,
@@ -197,19 +198,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
                         this._changeDetectorRef.markForCheck();
                     });
             },
-            columns: [
-                { data: 'id', orderable: false },
-                { data: 'bill_number' },
-                { data: 'date' },
-                { data: 'license_plate' },
-                { data: 'registration_date' },
-                { data: 'customer_name' },
-                { data: 'transaction_status', orderable: false },
-                { data: 'service_price', orderable: false },
-                { data: 'paytrue', orderable: false },
-                { data: 'payextra', orderable: false },
-            ],
-            order: [[0, 'desc']],
         };
     }
 
@@ -336,8 +324,10 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         const formatSDate = this._US.pdfDateFormat(startDate);
         const formatEDate = this._US.pdfDateFormat(endDate);
 
+        const branchId =
+            (this.user?.employees ?? this.user?.Employees)?.branch_id ?? '';
         window.open(
-            `${environment.API_URL}/api/report/reportExportPDFcheck_car_report?start_date=${formatSDate}&end_date=${formatEDate}&branch_id=1`
+            `${environment.API_URL}/api/report/reportExportPDFcheck_car_report?start_date=${formatSDate}&end_date=${formatEDate}&branch_id=${branchId}`
         );
     }
 

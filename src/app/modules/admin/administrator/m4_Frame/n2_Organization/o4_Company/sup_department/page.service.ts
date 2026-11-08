@@ -1076,7 +1076,6 @@ export class Service {
     }
 
     getLastNumber(req: any): Observable<any> {
-        console.log(req);
         return this._httpClient.post<any>(
             environment.API_URL + 'api/assets/get_last_number',
             req,
@@ -1211,7 +1210,6 @@ export class Service {
     }
 
     getPrintingCost(req: any): Observable<any> {
-        console.log(req);
         return this._httpClient
             .post<any>(
                 environment.API_URL + 'api/get-printing-cost',

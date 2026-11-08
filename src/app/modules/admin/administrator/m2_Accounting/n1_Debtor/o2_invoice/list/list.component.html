@@ -7,7 +7,9 @@
             <mat-progress-bar [mode]="'indeterminate'"></mat-progress-bar>
         </div>
         <!-- Title -->
-        <div class="text-4xl font-extrabold tracking-tight">รายการหนี้</div>
+        <div>
+            <div class="text-4xl font-extrabold tracking-tight">รายการหนี้</div>
+        </div>
         <!-- Actions -->
         <div class="flex space-x-2 reduceHeadPad">
             <mat-form-field appearance="fill" class="w-50">
@@ -61,7 +63,7 @@
                 </ng-container>
             </mat-tab-group>
             <div class="flex flex-col flex-auto min-w-full p-5 overflow-x-auto sm:overflow-x-auto sm:overflow-y-auto">
-                <table datatable [dtOptions]="dtOptions" class="table w-full row-border hover">
+                <table datatable [dtOptions]="dtOptions" class="table w-full row-border hover whitespace-nowrap debt-invoice-table">
                     <thead>
                         <tr>
                             <th class="w-5*">ลำดับ</th>
@@ -97,22 +99,24 @@
                                 class="p-1 text-sm font-semibold text-blue-500 bg-blue-100 rounded-md">ลดหนี้</span>
                                 <span *ngIf="item.transaction_status === 'closedebt'"
                                 class="p-1 text-sm font-semibold text-green-500 bg-green-200 rounded-md">ปิดงาน</span>
+                                <span *ngIf="!item.transaction_status">-</span>
                             </td>
                             <td class="">{{ item.service_price ?? '-' }}</td>
                             <td class="">{{ item.paytrue ?? '-' }}</td>
-                            <td class="">{{ item.payextra ?? '-' }}</td>
+                            <td class="whitespace-nowrap font-medium"
+                                [ngClass]="{
+                                    'text-amber-600': item.payextra?.startsWith('เพิ่ม'),
+                                    'text-blue-600': item.payextra?.startsWith('คืน')
+                                }">{{ item.payextra ?? '-' }}</td>
                             <td class="">{{ (item.paid_date| TH) ?? '-' }}</td>
-                            <td class="flex items-center justify-center w-auto space-x-1"
-                                 >
-                                <button mat-button    (click)="openDialog(item, $event)">
+                            <td class="text-center whitespace-nowrap">
+                                <button mat-icon-button type="button" (click)="openDialog(item, $event)">
                                     <mat-icon svgIcon="heroicons_solid:pencil-square"></mat-icon>
                                 </button>
                             </td>
                         </tr>
-                    </tbody>
-                    <tbody *ngIf="dataRow?.length == 0">
-                        <tr>
-                            <td colspan="11" class="text-center no-data-available">
+                        <tr *ngIf="!dataRow?.length">
+                            <td colspan="12" class="text-center no-data-available">
                                 ไม่มีข้อมูล !
                             </td>
                         </tr>
@@ -126,7 +130,7 @@
 <!-- <ng-template #Dialog>
     <div class="flex flex-col">
         <form [formGroup]="formData">
-            <h2 mat-dialog-title *ngIf="!isEdit">แก้ไขสถานะนี้</h2>
+            <app-dialog-header title="แก้ไขสถานะหนี้" (closeClick)="closeDialog()"></app-dialog-header>
             <mat-dialog-content>
                 <div class="flex flex-col w-full mt-2 lg:w-4/4">
                     <mff class="w-100*" [label]="'สถานะ'" [fCN]="'result'" [pHold]="'ผ่าน / ไม่ผ่าน'"></mff>
@@ -144,7 +148,7 @@
 <ng-template #Dialog>
     <div class="flex flex-col">
         <form [formGroup]="formData">
-            <h2 mat-dialog-title *ngIf="!isEdit">แก้ไขสถานะนี้</h2>
+            <app-dialog-header title="แก้ไขสถานะหนี้" (closeClick)="closeDialog()"></app-dialog-header>
             <mat-dialog-content>
                 <!-- แทนที่ส่วนเดิมด้วย mat-select -->
                 <div class="flex flex-col w-full mt-2 lg:w-4/4">

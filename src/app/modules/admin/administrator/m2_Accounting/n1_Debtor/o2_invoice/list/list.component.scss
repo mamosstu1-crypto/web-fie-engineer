@@ -50,6 +50,17 @@ table {
     width: 100%;
 }
 
+:host ::ng-deep table.dataTable {
+    thead th,
+    tbody td {
+        vertical-align: middle;
+    }
+
+    thead th {
+        white-space: nowrap;
+    }
+}
+
 .type {
     .open-status {
         background-color: #f59e0b;

@@ -93,7 +93,6 @@ export class DialogWorkOrder implements OnInit {
                 this.filterInspection_vats.next(this.Inspection_vats.slice());
             },
             error: (err) => {
-                console.log(err)
             }
         })
     }
@@ -115,8 +114,6 @@ export class DialogWorkOrder implements OnInit {
         this.form.patchValue({
             paid_date: this.datePipe.transform( this.form.get('paid_date').value , 'yyyy-MM-dd'),
         })
-        console.log(this.form.value, 'form value');
-
         this._US.confirmAction(
             'สร้างเลขที่ใบกำกับภาษี',
             'คุณต้องการสร้างเลขที่ใบกำกับภาษีใช่หรือไม่',
@@ -181,7 +178,6 @@ export class DialogWorkOrder implements OnInit {
           if (this.Inspection_vatsFilter.invalid) {
             this.Inspection_vatsFilter.markAsTouched(); // กำหนดสถานะ touched เพื่อแสดง mat-error
           }
-          console.log('No Inspection_vats Selected');
           return;
         }
 
@@ -197,7 +193,6 @@ export class DialogWorkOrder implements OnInit {
           if (this.Inspection_vatsFilter.invalid) {
             this.Inspection_vatsFilter.markAsTouched(); // กำหนดสถานะ touched เพื่อแสดง mat-error
           }
-          console.log('No Inspection_vats Found');
           return;
         }
       }

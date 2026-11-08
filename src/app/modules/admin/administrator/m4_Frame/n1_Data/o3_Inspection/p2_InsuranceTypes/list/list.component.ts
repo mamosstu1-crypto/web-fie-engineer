@@ -86,8 +86,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
     // DataTable Initialization
     // loadTable(): void { this._US.loadTable(this, this._Service, this._changeDetectorRef, this.pages, this, this.start, this); }
     loadTable(): void {
-        console.log(this.formData.value);
-
         this.dtOptions1 = {
             pagingType: 'full_numbers', pageLength: 10, displayStart: this.start,
             serverSide: true, processing: true, responsive: true,/*  order: [], */
@@ -133,9 +131,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
     // Utility Methods
     rerender(): void { this.dtElements.forEach((dtElement: DataTableDirective) =>
         { dtElement.dtInstance.then((dtInstance: any) => dtInstance.ajax.reload());
-
-        console.log('11', this.formData.value);
-        console.log('11', this.formData.value.vehicle_inspection_types_id);
         });
     }
     showEdit(): boolean { return this._US.hasPermission(1); }

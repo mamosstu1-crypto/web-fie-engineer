@@ -82,29 +82,26 @@
 <ng-template #Dialog>
     <div class="flex flex-col">
         <form [formGroup]="formData">
-            <h2 mat-dialog-title *ngIf="!isEdit && this.formData.get('type').value =='income' ">เพิ่มค่าใช้จ่าย รายรับ
-            </h2>
-            <h2 mat-dialog-title *ngIf="isEdit && this.formData.get('type').value =='income'">แก้ไขค่าใช้จ่าย รายรับ
-            </h2>
-            <h2 mat-dialog-title *ngIf="!isEdit && this.formData.get('type').value =='expenses' ">เพิ่มค่าใช้จ่าย
-                รายจ่าย</h2>
-            <h2 mat-dialog-title *ngIf="isEdit && this.formData.get('type').value =='expenses'">แก้ไขค่าใช้จ่าย จ่าย
-            </h2>
+            <app-dialog-header
+                [title]="isEdit
+                    ? (formData.get('type').value === 'income' ? 'แก้ไขค่าใช้จ่าย รายรับ' : 'แก้ไขค่าใช้จ่าย จ่าย')
+                    : (formData.get('type').value === 'income' ? 'เพิ่มค่าใช้จ่าย รายรับ' : 'เพิ่มค่าใช้จ่าย รายจ่าย')"
+                (closeClick)="closeDialog()"></app-dialog-header>
             <mat-dialog-content>
                 <!-- REPLACE CONTENT mt-2-->
                 <div class="flex flex-col w-full mt-2 lg:w-4/4">
                     <mff class="w-full" [label]="'รายการ'" [fCN]="'name'" [pHold]="'รายการ'"></mff>
                     <mff class="w-full" [label]="'ยอดเงิน'" [fCN]="'price'" [pHold]="'ยอดเงิน'" type="number" ></mff>
-                    <mat-form-field class="w-full">
-                        <mat-label>ประเภทค่าใช้จ่าย</mat-label>
+                    <mat-form-field class="w-full" hideRequiredMarker>
+                        <mat-label>ประเภทค่าใช้จ่าย<span class="bill-required-star">*</span></mat-label>
                         <mat-select [formControlName]="'expense_type_id'">
                             <mat-option *ngFor="let item of expense_types_fillter" [value]="item.id">
                                 {{ item.name }}
                             </mat-option>
                         </mat-select>
                     </mat-form-field>
-                    <mat-form-field class="w-full">
-                        <mat-label>ประเภทการชำระ</mat-label>
+                    <mat-form-field class="w-full" hideRequiredMarker>
+                        <mat-label>ประเภทการชำระ<span class="bill-required-star">*</span></mat-label>
                         <mat-select [formControlName]="'paid_type'">
                             <mat-option [value]="'paid_cash'">เงินสด</mat-option>
                             <mat-option [value]="'paid_tran'">เงินโอน</mat-option>
@@ -118,8 +115,8 @@
                         <mat-datepicker #picker></mat-datepicker>
                     </mat-form-field>
                     <div class="md:w-full">
-                        <mat-form-field [ngClass]="formFieldHelpers" class="w-full md:w-4/4">
-                            <mat-label>จัดการโดย</mat-label>
+                        <mat-form-field [ngClass]="formFieldHelpers" class="w-full md:w-4/4" hideRequiredMarker>
+                            <mat-label>จัดการโดย<span class="bill-required-star">*</span></mat-label>
                             <input matInput [formControl]="employeesFilter"
                                 [matAutocomplete]="approverAutoComplete" placeholder="ชื่อ" />
                             <mat-autocomplete #approverAutoComplete="matAutocomplete"

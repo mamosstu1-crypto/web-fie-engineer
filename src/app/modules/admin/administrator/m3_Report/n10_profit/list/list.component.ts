@@ -124,8 +124,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
 
                     this._changeDetectorRef.markForCheck();
                 });
-
-                console.log('Parameters:', dataTablesParameters);
             },
             columns: this.getTableColumns(),
         };

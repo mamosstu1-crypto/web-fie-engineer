@@ -15,19 +15,19 @@
                     <mat-select value="default" placeholder="เอกสาร">
                         <mat-option (click)="pdfDay()" class="" color="primary">
                             <mat-icon svgIcon="pdf-icon"></mat-icon>
-                            <span class="ml-2 mr-1">สรุปรายวัน</span>
+                            <span class="ml-2 mr-1">สรุปรายวัน (PDF)</span>
                         </mat-option>
                         <mat-option (click)="pdfMonth()" class="" color="primary">
                             <mat-icon svgIcon="pdf-icon"></mat-icon>
-                            <span class="ml-2 mr-1">สรุปรายเดือน</span>
+                            <span class="ml-2 mr-1">สรุปรายเดือน (PDF)</span>
                         </mat-option>
-                        <mat-option (click)="pdfDay()" class="" color="primary">
+                        <mat-option (click)="excelDay()" class="" color="primary">
                             <mat-icon svgIcon="excel-icon"></mat-icon>
-                            <span class="ml-2 mr-1">สรุปรายวัน</span>
+                            <span class="ml-2 mr-1">สรุปรายวัน (Excel)</span>
                         </mat-option>
-                        <mat-option (click)="pdfMonth()" class="" color="primary">
+                        <mat-option (click)="excelMonth()" class="" color="primary">
                             <mat-icon svgIcon="excel-icon"></mat-icon>
-                            <span class="ml-2 mr-1">สรุปรายเดือน</span>
+                            <span class="ml-2 mr-1">สรุปรายเดือน (Excel)</span>
                         </mat-option>
                     </mat-select>
                 </mat-form-field>
@@ -60,49 +60,51 @@
         </div>
     </div>
 
-    <div class="flex flex-col flex-auto p-5 sm:overflow-y-auto ">
-        <table datatable [dtOptions]="dtOptions" class="table w-full row-border hover whitespace-nowrap">
+    <div class="bill-scroll flex flex-col flex-auto p-5 sm:overflow-y-auto overflow-x-auto">
+        <table
+            datatable
+            [dtOptions]="dtOptions"
+            [dtTrigger]="dtTrigger"
+            class="table row-border hover whitespace-nowrap wide-data-table">
             <thead>
                 <tr>
-                    <!-- <th class="w-1 text-center" rowspan="2">#</th> -->
-                    <th class="" rowspan="2">เลขที่</th>
-                    <th class="" rowspan="2">วันที่</th>
-                    <th class="" rowspan="2">ทะเบียน</th>
-                    <th class="" rowspan="2">ชื่อลูกค้า</th>
-                    <th class="" colspan="9" class="text-center">บริการ</th>
-                    <th class="" rowspan="2">ส่วนลด</th>
-                    <th class="" rowspan="2">สุทธิ</th>
-                    <th class="w-1/12" rowspan="2">สถานะ</th>
-                    <th class="w-0* text-center" rowspan="2">จัดการ</th>
+                    <th rowspan="2" class="align-middle">เลขที่</th>
+                    <th rowspan="2" class="align-middle">วันที่</th>
+                    <th rowspan="2" class="align-middle">ทะเบียน</th>
+                    <th rowspan="2" class="align-middle col-name">ชื่อลูกค้า</th>
+                    <th colspan="9" class="text-center align-middle">บริการ</th>
+                    <th rowspan="2" class="align-middle">ส่วนลด</th>
+                    <th rowspan="2" class="align-middle">สุทธิ</th>
+                    <th rowspan="2" class="w-1/12 align-middle">สถานะ</th>
+                    <th rowspan="2" class="text-center align-middle">จัดการ</th>
                 </tr>
-                <tr class="text-white bg-gray-700">
-                    <th class="">ตรวจ</th>
-                    <th class="">ภาษี</th>
-                    <th class="">พ.ร.บ.</th>
-                    <th class="">ประกัน</th>
-                    <th class="">แก๊ส</th>
-                    <th class="">หนังสือรับรองวิศวกร</th>
-                    <th class="">ขนส่ง</th>
-                    <th class="">อื่นๆ</th>
-                    <th class="">EMS</th>
+                <tr class="service-subhead">
+                    <th>ตรวจ</th>
+                    <th>ภาษี</th>
+                    <th>พ.ร.บ.</th>
+                    <th>ประกัน</th>
+                    <th>แก๊ส</th>
+                    <th>หนังสือรับรองวิศวกร</th>
+                    <th>ขนส่ง</th>
+                    <th>อื่นๆ</th>
+                    <th>EMS</th>
                 </tr>
             </thead>
             <tbody *ngIf="dataRow1?.length != 0">
                 <tr *ngFor="let item of dataRow1; let i = index">
-                    <!-- <td style="width:5%">{{ pages.begin + (i + 1) }}</td> -->
                     <td>{{ item.no ?? '-' }}</td>
                     <td>{{ (item.date | TH) ?? '-'}}</td>
                     <td>{{ item.inspection_vehicles[0]?.license_plate ?? '-' ?? '-'}}</td>
-                    <td>{{ item.customers?.name ?? '-' }} {{ item.customers?.lname ?? '' }}</td>
-                    <td>{{ getServicePrice(item.inspection_vehicles[0].vehicle_service_transaction,1) }}</td>
-                    <td>{{ getTexTotal(item.inspection_vehicles[0].vehicle_service_transaction) }}</td>
-                    <td>{{ getServicePrice(item.inspection_vehicles[0].vehicle_service_transaction,2) }}</td>
-                    <td>{{ getServicePrice(item.inspection_vehicles[0].vehicle_service_transaction,7) }}</td>
-                    <td>{{ getGasTotal(item.inspection_vehicles[0].vehicle_service_transaction) }}</td>
-                    <td>{{ getServicePrice(item.inspection_vehicles[0].vehicle_service_transaction,13) }}</td>
-                    <td>{{ getServicePrice(item.inspection_vehicles[0].vehicle_service_transaction,14) }}</td>
-                    <td>{{ getServicePrice(item.inspection_vehicles[0].vehicle_service_transaction,15) }}</td>
-                    <td>{{ getServicePrice(item.inspection_vehicles[0].vehicle_service_transaction,16) }}</td>
+                    <td class="col-name">{{ formatCustomerDisplay(item) }}</td>
+                    <td class="svc-cell svc-cell-first">{{ getServicePrice(item.inspection_vehicles[0].vehicle_service_transaction,1) }}</td>
+                    <td class="svc-cell">{{ getTexTotal(item.inspection_vehicles[0].vehicle_service_transaction) }}</td>
+                    <td class="svc-cell">{{ getServicePrice(item.inspection_vehicles[0].vehicle_service_transaction,2) }}</td>
+                    <td class="svc-cell">{{ getServicePrice(item.inspection_vehicles[0].vehicle_service_transaction,7) }}</td>
+                    <td class="svc-cell">{{ getGasTotal(item.inspection_vehicles[0].vehicle_service_transaction) }}</td>
+                    <td class="svc-cell">{{ getServicePrice(item.inspection_vehicles[0].vehicle_service_transaction,13) }}</td>
+                    <td class="svc-cell">{{ getServicePrice(item.inspection_vehicles[0].vehicle_service_transaction,14) }}</td>
+                    <td class="svc-cell">{{ getServicePrice(item.inspection_vehicles[0].vehicle_service_transaction,15) }}</td>
+                    <td class="svc-cell">{{ getServicePrice(item.inspection_vehicles[0].vehicle_service_transaction,16) }}</td>
                     <td>{{ item.discount != null ? ((item.discount + item.discount_before_vat +
                         item.discount_after_vat)| number:'1.2-2') : '0.00' }}</td>
                     <td>
@@ -160,6 +162,7 @@
 
 <ng-template #paidType>
     <div class="flex flex-col">
+        <app-dialog-header title="จัดการข้อมูลบิล" (closeClick)="closeDialog(dialogRef)"></app-dialog-header>
         <form [formGroup]="formData">
             <mat-dialog-content>
                 <mat-tab-group [(selectedIndex)]="selectedTabIndex" (selectedIndexChange)="onTabChange($event)">
@@ -469,7 +472,7 @@
 <ng-template #TransecInform>
     <div class="flex flex-col">
         <form [formGroup]="formData_PaidData">
-            <h2 mat-dialog-title>แก้ไขประเภทการจ่าย</h2>
+            <app-dialog-header title='แก้ไขประเภทการจ่าย' (closeClick)="closeDialog(transecInformRef)"></app-dialog-header>
             <mat-dialog-content>
                 <!-- REPLACE CONTENT mt-2-->
                 <div class="flex flex-col w-full mt-2 lg:w-4/4">

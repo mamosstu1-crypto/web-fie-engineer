@@ -228,8 +228,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Dialog Operations
     openDialog(item?: any, event?: Event): void {
-        console.log(this.formData.value.image_url);
-
         if (event) {
             event.stopPropagation();
         }
@@ -283,8 +281,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     openDialogEdit(item: any) {
-        // this._router.navigate(['check-gas/list/formGas/' + id])
-        console.log('item', item);
 
         const DialogRef = this._dialog.open(DialogStatus, {
             disableClose: true,
@@ -312,7 +308,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         });
         DialogRef.afterClosed().subscribe((result) => {
             if (result) {
-                console.log(result, 'result');
                 this.rerender();
             }
         });
@@ -387,8 +382,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         } else {
             this.form.patchValue({ status: this.status[index].value });
         }
-        console.log(this.form.get('status').value);
-
         this.rerender();
     }
 
@@ -405,7 +398,6 @@ export class ListComponent implements OnInit, AfterViewInit, OnDestroy {
         });
         DialogRef.afterClosed().subscribe((result) => {
             if (result) {
-                console.log(result, 'result');
                 this.rerender();
             }
         });
